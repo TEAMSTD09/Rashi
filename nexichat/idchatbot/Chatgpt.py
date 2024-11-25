@@ -11,7 +11,6 @@ conversation_cache = {}
     group=-9
 )
 async def gemini_handler(client, message):
-    user_id = message.from_user.id
     user_input = None
 
     if message.text.startswith(("/", ".")) and len(message.command) > 1:
@@ -28,9 +27,9 @@ async def gemini_handler(client, message):
         split_text = message.text.split(" ", 1)
         if len(split_text) > 1:
             user_input = split_text[1]
-    
     if not user_input:
-        await message.reply_text("ᴇxᴀᴍᴘʟᴇ :- `/ask who is Narendra Modi` or `@chutiyapabot how are you`")
+        if message.text.startswith(("/", ".", f"@{client.me.username}")):
+            await message.reply_text(f"ᴇxᴀᴍᴘʟᴇ :- `/ask who are you baby` or `@{client.me.username} how are you`")
         return
 
     if user_id not in conversation_cache:
