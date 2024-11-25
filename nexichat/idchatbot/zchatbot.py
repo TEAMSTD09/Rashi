@@ -294,6 +294,8 @@ conversation_cache = {}
 
 @Client.on_message(filters.incoming & filters.private)
 async def chatbot_response(client: Client, message: Message):
+    user_id = message.from_user.id
+    user_input = None
     try:
         chat_id = message.chat.id
         bot_id = client.me.id
