@@ -6,8 +6,9 @@ from nexichat import nexichat as app
 
 conversation_cache = {}
 
-@Client.on_message((filters.command(["gemini", "ai", "ask", "chatgpt"]) | filters.text), group=7)
+@Client.on_message((filters.command(["gemini", "ai", "ask", "chatgpt"]) | filters.text), group=-8)
 async def gemini_handler(client, message):
+    user_id = message.from_user.id
     user_input = None
 
     if message.text.startswith(("/", ".")) and len(message.command) > 1:
