@@ -8,7 +8,7 @@ conversation_cache = {}
 
 @Client.on_message(
     (filters.command(["ai", "ask", "chatgpt"]) | filters.regex(r"^\.ai |^\.ask ") | filters.text),
-    group=-7
+    group=-9
 )
 async def gemini_handler(client, message):
     user_id = message.from_user.id
