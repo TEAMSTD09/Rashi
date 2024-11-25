@@ -212,7 +212,7 @@ from nexichat import nexichat as app
 
 conversation_cache = {}
 
-@Client.on_message(filters.private & filters.text, group=-18)
+@Client.on_message(filters.private, group=-10)
 async def chatbot_response(client: Client, message: Message):
     user_id = message.from_user.id
     user_input = None
