@@ -6,11 +6,32 @@ from nexichat import nexichat as app
 
 conversation_cache = {}
 
+async def typing_effect(client, message, reply_text):
+    try:
+        total_length = len(reply_text)
+        part1 = reply_text[:total_length // 5]
+        part2 = reply_text[total_length // 5:2 * total_length // 5]
+        part3 = reply_text[2 * total_length // 5:3 * total_length // 5]
+        part4 = reply_text[3 * total_length // 5:4 * total_length // 5]
+        part5 = reply_text[4 * total_length // 5:]
+
+        reply = await message.reply_text(part1)
+        await asyncio.sleep(0.01)
+        await reply.edit_text(part1 + part2)
+        await asyncio.sleep(0.01)
+        await reply.edit_text(part1 + part2 + part3)
+        await asyncio.sleep(0.01)
+        await reply.edit_text(part1 + part2 + part3 + part4)
+        await asyncio.sleep(0.01)
+        await reply.edit_text(part1 + part2 + part3 + part4 + part5)
+    except Exception as e:
+        return
+
+
 @Client.on_message(filters.command(["chatgpt", "gemini", "ai", "ask"]))
 async def chatgpt_chat(client, message):
     user_id = message.from_user.id
     user_input = None
-    
     if len(message.command) < 2 and not message.reply_to_message:
         await message.reply_text(
             "Example:\n\n`/ai write simple website code using html css, js?`"
@@ -22,8 +43,6 @@ async def chatgpt_chat(client, message):
     else:
         user_input = " ".join(message.command[1:])
 
-    if user_id not in conversation_cache:
-        conversation_cache[user_id] = []
     if user_id not in conversation_cache:
         conversation_cache[user_id] = []
 
@@ -57,7 +76,8 @@ async def chatgpt_chat(client, message):
                     conversation_cache[user_id].append((user_input, reply_text))
                     if len(conversation_cache[user_id]) > 15:
                         conversation_cache[user_id].pop(0)
-                    await message.reply_text(reply_text, quote=True)
+                    asyncio.create_task(typing_effect(client, message, reply_text))
+                    #await message.reply_text(reply_text, quote=True)
                     return
         await message.reply_text("**Both Gemini and Chat with AI are currently unavailable**")
     except:
