@@ -202,16 +202,16 @@ async def get_chat_language(chat_id, bot_id):
     chat_lang = await lang_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
     return chat_lang["language"] if chat_lang and "language" in chat_lang else None
     
-@Client.on_message(filters.incoming & ~filters.private & ~filters.group, group=-4)
+@Client.on_message(filters.incoming, group=-4)
 async def chatbot_response(client: Client, message: Message):
     try:
         chat_id = message.chat.id
         bot_id = client.me.id
         chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
-        
-        if chat_status and chat_status.get("status") == "disabled":
-            return
 
+        if (chat_status and chat_status.get("status") == "disabled") or (message.chat.type == "private" and message.text):
+            return
+    
         if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
             if message.chat.type in ["group", "supergroup"]:
                 return await add_served_chat(message.chat.id)
@@ -292,7 +292,7 @@ from nexichat import nexichat as app
 
 conversation_cache = {}
 
-@Client.on_message(filters.incoming, group=1)
+@Client.on_message(filters.private & filters.text, group=1)
 async def chatbot_response(client: Client, message: Message):
     user_id = message.from_user.id
     user_input = None
