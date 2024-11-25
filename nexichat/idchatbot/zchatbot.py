@@ -202,7 +202,7 @@ async def get_chat_language(chat_id, bot_id):
     chat_lang = await lang_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
     return chat_lang["language"] if chat_lang and "language" in chat_lang else None
     
-@Client.on_message(filters.incoming)
+@Client.on_message(filters.incoming & filters.group)
 async def chatbot_response(client: Client, message: Message):
     try:
         chat_id = message.chat.id
@@ -282,3 +282,115 @@ async def chatbot_response(client: Client, message: Message):
             pass
     except Exception as e:
         return
+
+import requests
+import asyncio
+from MukeshAPI import api
+from pyrogram import filters, Client
+from pyrogram.enums import ChatAction
+from nexichat import nexichat as app
+
+conversation_cache = {}
+
+@Client.on_message(filters.incoming & filters.private)
+async def chatbot_response(client: Client, message: Message):
+    try:
+        chat_id = message.chat.id
+        bot_id = client.me.id
+        chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
+        
+        if chat_status and chat_status.get("status") == "disabled":
+            return
+
+        if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
+            if message.chat.type in ["group", "supergroup"]:
+                return await add_served_chat(message.chat.id)
+            else:
+                return await add_served_user(message.chat.id)
+
+        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id) or not message.reply_to_message) and not message.from_user.is_bot:
+            user_input = message.text
+            if message.reply_to_message and message.reply_to_message.text:
+                user_input = message.reply_to_message.text
+            
+            
+            try:
+                if chat_id not in conversation_cache:
+                    conversation_cache[chat_id] = []
+
+                conversation_history = conversation_cache[chat_id]
+                prompt = "This is the conversation between the user and AI(your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho:\n\n"
+                for user_msg, ai_reply in conversation_history[-20:]:
+                    prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
+                prompt += f"User: {user_input}\nAI:"
+
+                response = api.gemini(prompt)
+                result = response.get("results")
+                if result:
+                    conversation_cache[chat_id].append((user_input, result))
+                    if len(conversation_cache[chat_id]) > 20:
+                        conversation_cache[chat_id].pop(0)
+                    await message.reply_text(result, quote=True)
+                    return
+            except:
+                pass
+
+            
+            reply_data = await get_reply(user_input)
+            if reply_data:
+                response_text = reply_data["text"]
+                chat_lang = await get_chat_language(chat_id, bot_id)
+
+                if not chat_lang or chat_lang == "nolang":
+                    translated_text = response_text
+                else:
+                    translated_text = GoogleTranslator(source='auto', target=chat_lang).translate(response_text)
+                    if not translated_text:
+                        translated_text = response_text
+
+                if reply_data["check"] == "sticker":
+                    try:
+                        await message.reply_sticker(reply_data["text"])
+                    except:
+                        pass
+                elif reply_data["check"] == "photo":
+                    try:
+                        await message.reply_photo(reply_data["text"])
+                    except:
+                        pass
+                elif reply_data["check"] == "video":
+                    try:
+                        await message.reply_video(reply_data["text"])
+                    except:
+                        pass
+                elif reply_data["check"] == "audio":
+                    try:
+                        await message.reply_audio(reply_data["text"])
+                    except:
+                        pass
+                elif reply_data["check"] == "gif":
+                    try:
+                        await message.reply_animation(reply_data["text"])
+                    except:
+                        pass
+                elif reply_data["check"] == "voice":
+                    try:
+                        await message.reply_voice(reply_data["text"])
+                    except:
+                        pass
+                else:
+                    try:
+                        await message.reply_text(translated_text)
+                    except:
+                        pass
+            else:
+                await message.reply_text("**I don't understand. What are you saying?**")
+
+        if message.reply_to_message:
+            await save_reply(message.reply_to_message, message)
+
+    except MessageEmpty:
+        try:
+            await message.reply_text("🙄🙄")
+        except:
+            pass
