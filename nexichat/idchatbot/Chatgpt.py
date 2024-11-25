@@ -10,7 +10,8 @@ conversation_cache = {}
 async def gemini_handler(client, message):
     user_id = message.from_user.id
     user_input = None
-
+    if message.from_user.is_bot:
+        return
     if message.text.startswith(f"@{client.me.username}"):
         user_input = message.text.split(" ", 1)[1] if len(message.text.split(" ", 1)) > 1 else None
     elif (
