@@ -233,7 +233,7 @@ async def typing_effect(client, message, translated_text):
         await asyncio.sleep(0.01)
         await reply.edit_text(part1 + part2 + part3)
     except Exception as e:
-        print(f"Error in typing_effect: {e}")
+        return
 
 async def get_chat_language(chat_id):
     chat_lang = await lang_db.find_one({"chat_id": chat_id})
