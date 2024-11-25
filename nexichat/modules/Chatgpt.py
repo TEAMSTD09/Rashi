@@ -6,6 +6,22 @@ from nexichat import nexichat as app
 
 conversation_cache = {}
 
+async def typing_effect(client, message, reply_text):
+    try:
+        total_length = len(reply_text)
+        part1 = reply_text[:total_length // 3]
+        part2 = reply_text[total_length // 3:2 * total_length // 3]
+        part3 = reply_text[2 * total_length // 3:]
+
+        reply = await message.reply_text(part1, quote=True)
+        await asyncio.sleep(0.01)
+        await reply.edit_text(part1 + part2)
+        await asyncio.sleep(0.01)
+        await reply.edit_text(part1 + part2 + part3)
+    except Exception as e:
+        return
+
+
 @app.on_message(filters.command(["chatgpt", "gemini", "ai", "ask"]))
 async def chatgpt_chat(client, message):
     user_id = message.from_user.id
@@ -54,7 +70,8 @@ async def chatgpt_chat(client, message):
                     conversation_cache[user_id].append((user_input, reply_text))
                     if len(conversation_cache[user_id]) > 15:
                         conversation_cache[user_id].pop(0)
-                    await message.reply_text(reply_text, quote=True)
+                    asyncio.create_task(typing_effect(client, message, reply_text))
+                    #await message.reply_text(reply_text, quote=True)
                     return
         await message.reply_text("**Both Gemini and Chat with AI are currently unavailable**")
     except:
