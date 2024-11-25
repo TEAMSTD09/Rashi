@@ -212,7 +212,7 @@ from nexichat import nexichat as app
 
 conversation_cache = {}
 
-@Client.on_message(filters.private, group=-10)
+@Client.on_message(filters.private & filters.text, group=10)
 async def chatbot_response(client: Client, message: Message):
     user_id = message.from_user.id
     user_input = None
@@ -321,8 +321,8 @@ async def chatbot_response(client: Client, message: Message):
         except:
             pass
 
-@Client.on_message(filters.incoming & ~filters.private, group=5)
-async def chatbot_response(client: Client, message: Message):
+@Client.on_message(filters.incoming & ~filters.private,, group=5)
+async def chatbot_responsee(client: Client, message: Message):
     try:
         chat_id = message.chat.id
         bot_id = client.me.id
