@@ -6,32 +6,18 @@ from nexichat import nexichat as app
 
 conversation_cache = {}
 
-@app.on_message(
-    filters.command(["ai", "ask", "chatgpt"]) | filters.regex(r"^\.(ai|ask) ") | filters.text,
-    group=7
-)
-async def gemini_handler(client, message):
-    user_id = message.from_user.id
-    user_input = None
-
-    if message.text.startswith(("/", ".")) and len(message.command) > 1:
-        user_input = " ".join(message.command[1:])
-    elif message.text.startswith(f"@{client.me.username}"):
-        user_input = message.text.split(" ", 1)[1] if len(message.text.split(" ", 1)) > 1 else None
-    elif message.reply_to_message and message.reply_to_message.text:
-        if message.text.startswith(("/", ".") + tuple([f"/{command}" for command in ["ai", "ask", "chatgpt"]])) or \
-           message.text.startswith(f"@{client.me.username}"):
-            user_input = message.reply_to_message.text
-    if message.reply_to_message and len(message.command) > 1:
-        user_input = " ".join(message.command[1:])
-    elif message.reply_to_message and message.text.startswith(f"@{client.me.username}"):
-        split_text = message.text.split(" ", 1)
-        if len(split_text) > 1:
-            user_input = split_text[1]
-    if not user_input:
-        if message.text.startswith(("/", ".", f"@{client.me.username}")):
-            await message.reply_text(f"ᴇxᴀᴍᴘʟᴇ :- `/ask who are you baby` or `@{client.me.username} how are you`")
+@app.on_message(filters.command(["chatgpt", "gemini", "ai", "ask"]))
+async def chatgpt_chat(client, message):
+    if len(message.command) < 2 and not message.reply_to_message:
+        await message.reply_text(
+            "Example:\n\n`/ai write simple website code using html css, js?`"
+        )
         return
+
+    if message.reply_to_message and message.reply_to_message.text:
+        user_input = message.reply_to_message.text
+    else:
+        user_input = " ".join(message.command[1:])
 
     if user_id not in conversation_cache:
         conversation_cache[user_id] = []
