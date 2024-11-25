@@ -202,7 +202,7 @@ async def get_chat_language(chat_id, bot_id):
     chat_lang = await lang_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
     return chat_lang["language"] if chat_lang and "language" in chat_lang else None
     
-@Client.on_message(filters.incoming & filters.group)
+@Client.on_message(filters.incoming & filters.group, group=-4)
 async def chatbot_response(client: Client, message: Message):
     try:
         chat_id = message.chat.id
