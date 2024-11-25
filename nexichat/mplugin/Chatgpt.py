@@ -11,7 +11,7 @@ async def gemini_handler(client, message):
     user_id = message.from_user.id
     user_input = None
 
-    if message.text.startswith(("/", ".")) and len(message.command) > 1:
+    if message.text.startswith(("/", ".")) and message.command and len(message.command) > 1:
         user_input = " ".join(message.command[1:])
     elif message.text.startswith(f"@{client.me.username}"):
         user_input = message.text.split(" ", 1)[1] if len(message.text.split(" ", 1)) > 1 else None
@@ -19,7 +19,7 @@ async def gemini_handler(client, message):
         if message.text.startswith(("/", ".") + tuple([f"/{command}" for command in ["ai", "ask", "chatgpt"]])) or \
            message.text.startswith(f"@{client.me.username}"):
             user_input = message.reply_to_message.text
-    if message.reply_to_message and len(message.command) > 1:
+    if message.reply_to_message and message.command and len(message.command) > 1:
         user_input = " ".join(message.command[1:])
     elif message.reply_to_message and message.text.startswith(f"@{client.me.username}"):
         split_text = message.text.split(" ", 1)
