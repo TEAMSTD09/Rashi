@@ -32,7 +32,7 @@ async def gemini_handler(client, message):
 
     conversation_history = conversation_cache[user_id]
     prompt = "This is the conversation between the user and AI(your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message):\n\n"
-    for user_msg, ai_reply in conversation_history[-10:]:
+    for user_msg, ai_reply in conversation_history[-20:]:
         prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
     prompt += f"User: {user_input}\nAI:"
 
@@ -42,7 +42,7 @@ async def gemini_handler(client, message):
         result = response.get("results")
         if result:
             conversation_cache[user_id].append((user_input, result))
-            if len(conversation_cache[user_id]) > 15:
+            if len(conversation_cache[user_id]) > 20:
                 conversation_cache[user_id].pop(0)
             await message.reply_text(result, quote=True)
             return
