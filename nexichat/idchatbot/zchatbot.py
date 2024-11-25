@@ -321,7 +321,7 @@ async def chatbot_response(client: Client, message: Message):
         except:
             pass
 
-@Client.on_message(filters.incoming & ~filters.private,, group=5)
+@Client.on_message(filters.incoming & ~filters.private, group=5)
 async def chatbot_responsee(client: Client, message: Message):
     try:
         chat_id = message.chat.id
