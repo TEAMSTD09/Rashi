@@ -8,6 +8,8 @@ conversation_cache = {}
 
 @app.on_message(filters.command(["chatgpt", "gemini", "ai", "ask"]))
 async def chatgpt_chat(client, message):
+    user_id = message.from_user.id
+    user_input = None
     if len(message.command) < 2 and not message.reply_to_message:
         await message.reply_text(
             "Example:\n\n`/ai write simple website code using html css, js?`"
