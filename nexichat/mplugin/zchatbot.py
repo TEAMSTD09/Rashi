@@ -216,7 +216,7 @@ async def typing_effect(client, message, translated_text):
         await asyncio.sleep(0.01)
         await reply.edit_text(part1 + part2 + part3)
     except Exception as e:
-        print(f"Error in typing_effect: {e}")
+        return
 
 @Client.on_message(filters.incoming)
 async def chatbot_response(client: Client, message: Message):
