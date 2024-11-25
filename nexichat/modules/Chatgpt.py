@@ -1,4 +1,5 @@
 import requests
+import asyncio
 from MukeshAPI import api
 from pyrogram import filters, Client
 from pyrogram.enums import ChatAction
@@ -13,7 +14,7 @@ async def typing_effect(client, message, reply_text):
         part2 = reply_text[total_length // 3:2 * total_length // 3]
         part3 = reply_text[2 * total_length // 3:]
 
-        reply = await message.reply_text(part1)
+        reply = await message.reply_text(part1, quote=True)
         await asyncio.sleep(0.01)
         await reply.edit_text(part1 + part2)
         await asyncio.sleep(0.01)
