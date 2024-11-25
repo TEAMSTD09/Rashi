@@ -11,6 +11,7 @@ conversation_cache = {}
     group=-9
 )
 async def gemini_handler(client, message):
+    user_id = message.from_user.id
     user_input = None
 
     if message.text.startswith(("/", ".")) and len(message.command) > 1:
