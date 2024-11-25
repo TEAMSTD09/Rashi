@@ -329,7 +329,7 @@ async def chatbot_response(client: Client, message: Message):
         chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
         
         if (chat_status and chat_status.get("status") == "disabled") or (message.text and message.chat.type not in ["group", "supergroup"]):
-
+            return 
         if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
             if message.chat.type in ["group", "supergroup"]:
                 return await add_served_chat(message.chat.id)
