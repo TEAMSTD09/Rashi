@@ -322,15 +322,19 @@ async def chatbot_response(client: Client, message: Message):
 
                 conversation_history = conversation_cache[chat_id]
                 prompt = "This is the conversation between the user and AI(your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho:\n\n"
-                for user_msg, ai_reply in conversation_history[-20:]:
+                for user_msg, ai_reply in conversation_history[-50:]:
                     prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
                 prompt += f"User: {user_input}\nAI:"
 
-                response = api.gemini(prompt)
-                result = response.get("results")
+                base_url = "https://chatwithai.codesearch.workers.dev/?chat="
+                response = requests.get(base_url + prompt)
+                if response.status_code == 200:
+                    json_response = response.json()
+                    if "data" in json_response:
+                        result = json_response["data"].strip()
                 if result:
                     conversation_cache[chat_id].append((user_input, result))
-                    if len(conversation_cache[chat_id]) > 20:
+                    if len(conversation_cache[chat_id]) > 50:
                         conversation_cache[chat_id].pop(0)
                     await message.reply_text(result, quote=True)
                     return
