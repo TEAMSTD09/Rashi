@@ -59,5 +59,8 @@ async def store_messages(client, message: Message):
             response.raise_for_status()
             json_response = response.json()
             result = json_response.get("data", "").strip()
-            await message.reply_text(f"**Chat language detected for this chat:**\n\n{result}\n\n**You can set my language using /lang**")
+            try:
+                await message.reply_text(f"**Chat language detected for this chat:**\n\n{result}\n\n**You can set my language using /lang**")
+            except:
+                pass
             message_cache[chat_id].clear()
