@@ -204,9 +204,6 @@ async def get_chat_language(chat_id, bot_id):
 
 
 import requests
-import asyncio
-from MukeshAPI import api
-from pyrogram import filters, Client
 from pyrogram.enums import ChatAction
 from nexichat import nexichat as app
 
