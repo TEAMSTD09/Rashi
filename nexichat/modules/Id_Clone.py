@@ -161,10 +161,10 @@ async def restart_idchatbots():
                 await ai.start()
                 user = await ai.get_me()
                 try:
-                    await ai.join_chat("THE_VIP_BOY_OP")
                     await ai.join_chat("VIP_CREATORS")
                     await ai.join_chat("TG_FRIENDSSS")
                     await ai.join_chat("THE_VIP_BOY")
+                    await ai.join_chat("THE_VIP_BOY_OP")
                 except Exception as e:
                     pass
                 if user.id not in IDCLONES:
@@ -172,9 +172,10 @@ async def restart_idchatbots():
 
                 logging.info(f"Successfully restarted session for: @{user.username or user.first_name}")
             except Exception as e:
-                logging.exception(f"Error while restarting session: {string_session}. Removing invalid session.")
-                await idclonebotdb.delete_one({"session": string_session})
-
+                logging.exception(f"Error while restarting session: {string_session}. invalid session.")
+                #await idclonebotdb.delete_one({"session": string_session})
+                pass
+        
         await asyncio.gather(*(restart_session(session) for session in sessions))
 
         logging.info("All sessions restarted successfully.")
