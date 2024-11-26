@@ -201,10 +201,10 @@ async def get_reply(word: str):
     return random.choice(relevant_replies) if relevant_replies else None
 
 
-async def get_chat_language(chat_id, bot_id):
-    chat_lang = await lang_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
+async def get_chat_language(chat_id):
+    chat_lang = await lang_db.find_one({"chat_id": chat_id})
     return chat_lang["language"] if chat_lang and "language" in chat_lang else None
-
+    
 
 import requests
 from pyrogram.enums import ChatAction
