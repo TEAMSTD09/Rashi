@@ -299,7 +299,7 @@ async def chatbot_response(client: Client, message: Message):
     except MessageEmpty:
         await message.reply_text("🙄🙄")
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        return
 
 
 async def handle_reply(message, reply_data, translated_text):
@@ -321,7 +321,7 @@ async def handle_reply(message, reply_data, translated_text):
             await client.send_chat_action(message.chat.id, ChatAction.TYPING)
             asyncio.create_task(typing_effect(client, message, translated_text))
     except Exception as e:
-        print(f"Error sending reply: {e}")
+        return
 
 @Client.on_message(filters.incoming & filters.group, group=13)
 async def chatbot_responsee(client: Client, message: Message):
