@@ -272,6 +272,7 @@ async def chatbot_response(client: Client, message: Message):
                         if len(conversation_cache[chat_id]) > 50:
                             conversation_cache[chat_id].pop(0)
                         translated_text = result
+                        await client.send_chat_action(message.chat.id, ChatAction.TYPING)
                         asyncio.create_task(typing_effect(client, message, translated_text))
                         return
                 except requests.RequestException as e:
@@ -298,8 +299,7 @@ async def chatbot_response(client: Client, message: Message):
     except MessageEmpty:
         await message.reply_text("🙄🙄")
     except Exception as e:
-        print(f"Unexpected error: {e}")
-
+        return
 
 async def handle_reply(message, reply_data, translated_text):
     reply_check = reply_data["check"]
@@ -317,10 +317,10 @@ async def handle_reply(message, reply_data, translated_text):
         elif reply_check == "voice":
             await message.reply_voice(reply_data["text"])
         else:
+            await client.send_chat_action(message.chat.id, ChatAction.TYPING)
             await message.reply_text(translated_text)
     except Exception as e:
-        print(f"Error sending reply: {e}")
-
+        return 
 @Client.on_message(filters.incoming & filters.group, group=11)
 async def chatbot_responsee(client: Client, message: Message):
     try:
