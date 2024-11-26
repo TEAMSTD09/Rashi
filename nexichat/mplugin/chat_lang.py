@@ -56,7 +56,7 @@ async def store_messages(client, message: Message):
             """
             
             base_url = "https://chatwithai.codesearch.workers.dev/?chat="
-            response = requests.get(base_url + prompt)
+            response = requests.get(base_url + user_input)
             response.raise_for_status()
             json_response = response.json()
             result = json_response.get("data", "").strip()
