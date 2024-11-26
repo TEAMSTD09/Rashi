@@ -69,7 +69,7 @@ async def clone_txt(client, message):
                     await ai.join_chat("TG_FRIENDSSS")
                 except:
                     pass
-            except Exception as e:
+            except:
                 pass
             
             await app.send_message(
@@ -88,8 +88,10 @@ async def clone_txt(client, message):
             logging.exception("Error during cloning process.")
             await mi.edit_text(f"**Invalid String Session. Please provide a valid pyrogram string session.:**\n\n**Error:** `{e}`")
     else:
-        await message.reply_text("**Provide a Pyrogram String Session after the .idclone **\n\n**Example:** `.idclone string session paste here`\n\n**Get a Pyrogram string session from here:-** [Click Here](https://t.me/VIP_CREATORS/1393) ")
-
+        try:
+            await message.reply_text("**Provide a Pyrogram String Session after the /idclone **\n\n**Example:** `/idclone string session paste here`\n\n**Get a Pyrogram string session from here:-** [Click Here](https://t.me/VIP_CREATORS/1393) ")
+        except:
+            return
 
 @Client.on_message(filters.command(["idcloned", "clonedid"], prefixes=[".", "/"]))
 async def list_cloned_sessions(client, message):
@@ -97,8 +99,10 @@ async def list_cloned_sessions(client, message):
         cloned_bots = idclonebotdb.find()
         cloned_bots_list = await cloned_bots.to_list(length=None)
         if not cloned_bots_list:
-            await message.reply_text("**No sessions have been cloned yet.**")
-            return
+            try:
+                await message.reply_text("**No sessions have been cloned yet.**")
+            except:
+                return
 
         total_clones = len(cloned_bots_list)
         text = f"**Total Cloned Sessions:** {total_clones}\n\n"
@@ -109,9 +113,10 @@ async def list_cloned_sessions(client, message):
 
         await message.reply_text(text)
     except Exception as e:
-        logging.exception(e)
-        await message.reply_text("**An error occurred while getting list of cloned id-chatbots**")
-
+        try:
+            return await message.reply_text(f"**An error occurred while getting list of cloned id-chatbots**\n\n**Error:-** {e}")
+        except:
+            return
 
 @Client.on_message(
     filters.command(["delidclone", "delcloneid", "deleteidclone", "removeidclone"], prefixes=["."])
@@ -136,9 +141,11 @@ async def delete_cloned_session(client, message):
         else:
             await message.reply_text("**⚠️ The provided session is not in the cloned list.**")
     except Exception as e:
-        await message.reply_text(f"**An error occurred while deleting the cloned session:** {e}")
-        logging.exception(e)
-
+        try:
+            await message.reply_text(f"**An error occurred while deleting the cloned session:** {e}")
+        except:
+            return
+    
 
 @Client.on_message(filters.command("delallidclone", prefixes=[".", "/"]) & filters.user(int(OWNER_ID)))
 async def delete_all_cloned_sessions(client, message):
@@ -148,7 +155,9 @@ async def delete_all_cloned_sessions(client, message):
         IDCLONES.clear()
         await a.edit_text("**All cloned sessions have been deleted successfully ✅**")
     except Exception as e:
-        await a.edit_text(f"**An error occurred while deleting all cloned sessions:** {e}")
-        logging.exception(e)
+        try:
+            await a.edit_text(f"**An error occurred while deleting all cloned sessions:** {e}")
+        except:
+            return
 
 
