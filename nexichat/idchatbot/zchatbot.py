@@ -224,19 +224,20 @@ async def typing_effect(client, message, translated_text):
     except Exception as e:
         return
 
+
+
 @Client.on_message(filters.private, group=10)
 async def chatbot_response(client: Client, message: Message):
     user_id = message.from_user.id
     chat_id = message.chat.id
-    bot_id = client.me.id
     user_input = None
+    bot_id = client.me.id
 
     try:
-        bot_id = client.me.id
         chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
-        
         if chat_status and chat_status.get("status") == "disabled":
             return
+
         
         if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
             if message.chat.type in ["group", "supergroup"]:
@@ -246,10 +247,11 @@ async def chatbot_response(client: Client, message: Message):
                 await add_served_cuser(bot_id, message.chat.id)
                 return await add_served_user(message.chat.id)
 
+       
         if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id) or not message.reply_to_message) and not message.from_user.is_bot:
             user_input = message.text if not message.reply_to_message else message.reply_to_message.text
 
-            if user_input:
+            if user_input and message.text:
                 if chat_id not in conversation_cache:
                     conversation_cache[chat_id] = []
 
@@ -261,6 +263,7 @@ async def chatbot_response(client: Client, message: Message):
 
                 base_url = "https://chatwithai.codesearch.workers.dev/?chat="
                 try:
+                   
                     response = requests.get(base_url + prompt)
                     response.raise_for_status()
 
@@ -268,28 +271,45 @@ async def chatbot_response(client: Client, message: Message):
                     result = json_response.get("data", "").strip()
 
                     if result:
+                        
                         conversation_cache[chat_id].append((user_input, result))
                         if len(conversation_cache[chat_id]) > 50:
                             conversation_cache[chat_id].pop(0)
-                        translated_text = result
+
                         await client.send_chat_action(message.chat.id, ChatAction.TYPING)
-                        asyncio.create_task(typing_effect(client, message, translated_text))
+                        asyncio.create_task(typing_effect(client, message, result))
                         return
                 except requests.RequestException as e:
                     print(f"Error with AI response: {e}")
 
+           
             reply_data = await get_reply(user_input)
             if reply_data:
-                try:
-                    chat_lang = await get_chat_language(chat_id, bot_id)
-                    translated_text = (
-                        GoogleTranslator(source="auto", target=chat_lang).translate(reply_data["text"])
-                        if chat_lang and chat_lang != "nolang"
-                        else reply_data["text"]
-                    )
-                    await handle_reply(message, reply_data, translated_text)
-                except Exception as e:
-                    print(f"Error handling reply: {e}")
+                response_text = reply_data["text"]
+                chat_lang = await get_chat_language(chat_id, bot_id)
+
+                if not chat_lang or chat_lang == "nolang":
+                    translated_text = response_text
+                else:
+                    translated_text = GoogleTranslator(source='auto', target=chat_lang).translate(response_text)
+                    if not translated_text:
+                        translated_text = response_text
+
+                
+                if reply_data["check"] == "sticker":
+                    await message.reply_sticker(reply_data["text"])
+                elif reply_data["check"] == "photo":
+                    await message.reply_photo(reply_data["text"])
+                elif reply_data["check"] == "video":
+                    await message.reply_video(reply_data["text"])
+                elif reply_data["check"] == "audio":
+                    await message.reply_audio(reply_data["text"])
+                elif reply_data["check"] == "gif":
+                    await message.reply_animation(reply_data["text"])
+                elif reply_data["check"] == "voice":
+                    await message.reply_voice(reply_data["text"])
+                else:
+                    asyncio.create_task(typing_effect(client, message, translated_text))
             else:
                 await message.reply_text("**I don't understand. What are you saying?**")
 
@@ -300,27 +320,8 @@ async def chatbot_response(client: Client, message: Message):
         await message.reply_text("🙄🙄")
     except Exception as e:
         return
+        
 
-async def handle_reply(message, reply_data, translated_text):
-    reply_check = reply_data["check"]
-    try:
-        if reply_check == "sticker":
-            await message.reply_sticker(reply_data["text"])
-        elif reply_check == "photo":
-            await message.reply_photo(reply_data["text"])
-        elif reply_check == "video":
-            await message.reply_video(reply_data["text"])
-        elif reply_check == "audio":
-            await message.reply_audio(reply_data["text"])
-        elif reply_check == "gif":
-            await message.reply_animation(reply_data["text"])
-        elif reply_check == "voice":
-            await message.reply_voice(reply_data["text"])
-        else:
-            await client.send_chat_action(message.chat.id, ChatAction.TYPING)
-            await message.reply_text(translated_text)
-    except Exception as e:
-        return 
 @Client.on_message(filters.incoming & filters.group, group=11)
 async def chatbot_responsee(client: Client, message: Message):
     try:
