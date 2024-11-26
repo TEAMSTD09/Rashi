@@ -247,7 +247,7 @@ async def chatbot_response(client: Client, message: Message):
                 await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
                 return
         chat_id = message.chat.id
-        chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
+        chat_status = await status_db.find_one({"chat_id": chat_id})
         
         if chat_status and chat_status.get("status") == "disabled":
             return
@@ -292,7 +292,7 @@ async def chatbot_response(client: Client, message: Message):
             reply_data = await get_reply(user_input)
             if reply_data:
                 try:
-                    chat_lang = await get_chat_language(chat_id, bot_id)
+                    chat_lang = await get_chat_language(chat_id)
                     translated_text = (
                         GoogleTranslator(source="auto", target=chat_lang).translate(reply_data["text"])
                         if chat_lang and chat_lang != "nolang"
@@ -362,8 +362,7 @@ async def chatbot_responsee(client: Client, message: Message):
                 return
         chat_id = message.chat.id
         bot_id = client.me.id
-        chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
-        
+        chat_status = await status_db.find_one({"chat_id": chat_id})
         if chat_status and chat_status.get("status") == "disabled":
             return
 
@@ -379,7 +378,7 @@ async def chatbot_responsee(client: Client, message: Message):
 
             if reply_data:
                 response_text = reply_data["text"]
-                chat_lang = await get_chat_language(chat_id, bot_id)
+                chat_lang = await get_chat_language(chat_id)
 
                 if not chat_lang or chat_lang == "nolang":
                     translated_text = response_text
