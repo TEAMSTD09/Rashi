@@ -18,10 +18,10 @@ cloneownerdb = mongodb.cloneownerdb
 idclonebotdb = mongodb.idclonebotdb
 
 
-@app.on_message(filters.command(["idclone", "cloneid"]))
+@app.on_message(filters.command(["idclone"]))
 async def clone_txt(client, message):
     if len(message.command) > 1:
-        string_session = message.text.split(["/idclone", "/cloneid"], 1)[1].strip()
+        string_session = message.text.split("/idclone", 1)[1].strip()
         mi = await message.reply_text("**Checking your String Session...**")
         try:
             ai = Client(
