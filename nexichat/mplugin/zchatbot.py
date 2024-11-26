@@ -224,7 +224,7 @@ async def typing_effect(client, message, translated_text):
     except Exception as e:
         return
     
-@Client.on_message(filters.private, group=10)
+@Client.on_message(filters.private, group=14)
 async def chatbot_response(client: Client, message: Message):
     user_id = message.from_user.id
     chat_id = message.chat.id
@@ -321,7 +321,7 @@ async def handle_reply(message, reply_data, translated_text):
     except Exception as e:
         print(f"Error sending reply: {e}")
 
-@Client.on_message(filters.incoming & filters.group, group=19)
+@Client.on_message(filters.incoming & filters.group, group=15)
 async def chatbot_responsee(client: Client, message: Message):
     try:
         chat_id = message.chat.id
