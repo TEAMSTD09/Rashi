@@ -214,6 +214,7 @@ conversation_cache = {}
 
 async def typing_effect(client, message, translated_text):
     try:
+        await client.send_chat_action(message.chat.id, ChatAction.TYPING)
         total_length = len(translated_text)
         part1 = translated_text[:total_length // 3]
         part2 = translated_text[total_length // 3:2 * total_length // 3]
