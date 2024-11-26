@@ -61,5 +61,8 @@ async def store_messages(client, message: Message):
             json_response = response.json()
             result = json_response.get("data", "").strip()
             reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("sᴇʟᴇᴄᴛ ʟᴀɴɢᴜᴀɢᴇ", callback_data="choose_lang")]])    
-            await message.reply_text(f"**Chat language detected for this chat:**\n\n{result}\n\n**You can set my lang by /lang**", reply_markup=reply_markup)
+            try:
+                await message.reply_text(f"**Chat language detected for this chat:**\n\n{result}\n\n**You can set my lang by /lang**", reply_markup=reply_markup)
+            except:
+                pass
             message_cache[chat_id].clear()
