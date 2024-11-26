@@ -55,7 +55,7 @@ async def store_messages(client, message: Message):
             Provide only overall [Lang Name and Lang Code] in the above format. Do not provide anything else.
             """
             base_url = "https://chatwithai.codesearch.workers.dev/?chat="
-            response = requests.get(base_url + prompt)
+            response = requests.get(base_url + user_input)
             response.raise_for_status()
             json_response = response.json()
             result = json_response.get("data", "").strip()
