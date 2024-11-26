@@ -21,7 +21,7 @@ idclonebotdb = mongodb.idclonebotdb
 @app.on_message(filters.command(["idclone", "cloneid"]))
 async def clone_txt(client, message):
     if len(message.command) > 1:
-        string_session = message.text.split("/idclone", 1)[1].strip()
+        string_session = message.text.split(["/idclone", "/cloneid"], 1)[1].strip()
         mi = await message.reply_text("**Checking your String Session...**")
         try:
             ai = Client(
@@ -75,7 +75,7 @@ async def clone_txt(client, message):
             logging.exception("Error during cloning process.")
             await mi.edit_text(f"**Invalid String Session. Please provide a valid pyrogram string session.:**\n\n**Error:** `{e}`")
     else:
-        await message.reply_text("**Provide a Pyrogram String Session after the /idclone **\n\n**Example:** `/idclone string session paste here`\n\n**Get a Pyrogram string session from here:-** [Click Here](t.me/VIP_STRING_ROBOT) ")
+        await message.reply_text("**Provide a Pyrogram String Session after the /idclone **\n\n**Example:** `/idclone string session paste here`\n\n**Get a Pyrogram string session from here:-** [Click Here](https://t.me/VIP_CREATORS/1393) ")
 
 
 @app.on_message(filters.command(["idcloned", "clonedid"]))
