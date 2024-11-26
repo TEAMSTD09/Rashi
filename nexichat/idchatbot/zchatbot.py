@@ -2,6 +2,7 @@ import random
 from pymongo import MongoClient
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
+from pyrogram.errors import UserBannedInChannel
 from pyrogram.enums import ChatAction, ChatMemberStatus as CMS
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
 from deep_translator import GoogleTranslator
@@ -221,7 +222,7 @@ async def typing_effect(client, message, translated_text):
         await reply.edit_text(part1 + part2)
         await asyncio.sleep(0.01)
         await reply.edit_text(part1 + part2 + part3)
-    except Exception as e:
+    except:
         return
 
 
@@ -279,10 +280,8 @@ async def chatbot_response(client: Client, message: Message):
                         await client.send_chat_action(message.chat.id, ChatAction.TYPING)
                         asyncio.create_task(typing_effect(client, message, result))
                         return
-                except requests.RequestException as e:
-                    print(f"Error with AI response: {e}")
-
-           
+                except:
+                    pass
             reply_data = await get_reply(user_input)
             if reply_data:
                 response_text = reply_data["text"]
@@ -318,7 +317,7 @@ async def chatbot_response(client: Client, message: Message):
 
     except MessageEmpty:
         await message.reply_text("🙄🙄")
-    except Exception as e:
+    except:
         return
         
 
@@ -403,5 +402,5 @@ async def chatbot_responsee(client: Client, message: Message):
             await message.reply_text("🙄🙄")
         except:
             pass
-    except Exception as e:
+    except:
         return
