@@ -345,8 +345,11 @@ async def handle_reply(message, reply_data, translated_text):
         else:
             asyncio.create_task(typing_effect(client, message, translated_text))
     except Exception as e:
-        print(f"Error sending reply: {e}")
+       return 
 
+
+
+                                          
 @nexichat.on_message(filters.incoming & filters.group, group=15)
 async def chatbot_responsee(client: Client, message: Message):
     global blocklist, message_counts
@@ -375,17 +378,17 @@ async def chatbot_responsee(client: Client, message: Message):
                 await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
                 return
         chat_id = message.chat.id
-        bot_id = client.me.id
+      
         chat_status = await status_db.find_one({"chat_id": chat_id})
+        
         if chat_status and chat_status.get("status") == "disabled":
             return
 
-        
         if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
             if message.chat.type in ["group", "supergroup"]:
-                return await add_served_chat(message.chat.id)
+                return await add_served_chat(chat_id)
             else:
-                return await add_served_user(message.chat.id)
+                return await add_served_user(chat_id)
 
         if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id) or not message.reply_to_message) and not message.from_user.is_bot:
             reply_data = await get_reply(message.text)
@@ -393,7 +396,7 @@ async def chatbot_responsee(client: Client, message: Message):
             if reply_data:
                 response_text = reply_data["text"]
                 chat_lang = await get_chat_language(chat_id)
-
+                
                 if not chat_lang or chat_lang == "nolang":
                     translated_text = response_text
                 else:
@@ -451,3 +454,4 @@ async def chatbot_responsee(client: Client, message: Message):
             pass
     except Exception as e:
         return
+    
