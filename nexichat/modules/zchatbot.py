@@ -2,15 +2,18 @@ import random
 from pymongo import MongoClient
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
+from datetime import datetime, timedelta
+from pyrogram.enums import ChatMemberStatus, ChatType
+from pyrogram.errors import UserNotParticipant
 from pyrogram.enums import ChatAction, ChatMemberStatus as CMS
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
 from deep_translator import GoogleTranslator
 from nexichat.database.chats import add_served_chat
 from nexichat.database.users import add_served_user
-from nexichat.database import abuse_list, chatai
+from nexichat.database import chatai, abuse_list
 from config import MONGO_URL, OWNER_ID
 from nexichat import nexichat, mongo, LOGGER, db
-from nexichat.modules.helpers import languages
+from nexichat.modules.helpers import CHATBOT_ON, languages
 import asyncio
 
 translator = GoogleTranslator()
@@ -198,29 +201,165 @@ async def get_reply(word: str):
     return random.choice(relevant_replies) if relevant_replies else None
 
 
-
 async def get_chat_language(chat_id, bot_id):
     chat_lang = await lang_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
     return chat_lang["language"] if chat_lang and "language" in chat_lang else None
 
-async def typing_effect(client, message, translated_text):
-    try:
-        total_length = len(translated_text)
-        part1 = translated_text[:total_length // 3]
-        part2 = translated_text[total_length // 3:2 * total_length // 3]
-        part3 = translated_text[2 * total_length // 3:]
 
-        reply = await message.reply_text(part1, quote=True)
-        await asyncio.sleep(0.01)
-        await reply.edit_text(part1 + part2)
-        await asyncio.sleep(0.01)
-        await reply.edit_text(part1 + part2 + part3)
-    except Exception as e:
-        return
+import requests
+import asyncio
+from MukeshAPI import api
+from pyrogram import filters, Client
+from pyrogram.enums import ChatAction
+from nexichat import nexichat as app
 
-@nexichat.on_message(filters.incoming)
+conversation_cache = {}
+
+@nexichat.on_message(filters.private, group=10)
 async def chatbot_response(client: Client, message: Message):
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+    user_input = None
+
+    global blocklist, message_counts
     try:
+        user_id = message.from_user.id
+        chat_id = message.chat.id
+        current_time = datetime.now()
+        
+        blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
+
+        if user_id in blocklist:
+            return
+
+        if user_id not in message_counts:
+            message_counts[user_id] = {"count": 1, "last_time": current_time}
+        else:
+            time_diff = (current_time - message_counts[user_id]["last_time"]).total_seconds()
+            if time_diff <= 3:
+                message_counts[user_id]["count"] += 1
+            else:
+                message_counts[user_id] = {"count": 1, "last_time": current_time}
+            
+            if message_counts[user_id]["count"] >= 6:
+                blocklist[user_id] = current_time + timedelta(minutes=1)
+                message_counts.pop(user_id, None)
+                await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
+                return
+        chat_id = message.chat.id
+        chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
+        
+        if chat_status and chat_status.get("status") == "disabled":
+            return
+        
+        if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
+            if message.chat.type in ["group", "supergroup"]:
+                await add_served_chat(chat_id)
+            else:
+                await add_served_user(chat_id)
+            return
+
+        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id) or not message.reply_to_message) and not message.from_user.is_bot:
+            user_input = message.text if not message.reply_to_message else message.reply_to_message.text
+
+            if user_input:
+                if chat_id not in conversation_cache:
+                    conversation_cache[chat_id] = []
+
+                conversation_history = conversation_cache[chat_id]
+                prompt = "This is the conversation between the user and AI(your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool):\n\n"
+                for user_msg, ai_reply in conversation_history[-50:]:
+                    prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
+                prompt += f"User: {user_input}\nAI:"
+
+                base_url = "https://chatwithai.codesearch.workers.dev/?chat="
+                try:
+                    response = requests.get(base_url + prompt)
+                    response.raise_for_status()
+
+                    json_response = response.json()
+                    result = json_response.get("data", "").strip()
+
+                    if result:
+                        conversation_cache[chat_id].append((user_input, result))
+                        if len(conversation_cache[chat_id]) > 50:
+                            conversation_cache[chat_id].pop(0)
+                        await message.reply_text(result, quote=True)
+                        return
+                except requests.RequestException as e:
+                    print(f"Error with AI response: {e}")
+
+            reply_data = await get_reply(user_input)
+            if reply_data:
+                try:
+                    chat_lang = await get_chat_language(chat_id, bot_id)
+                    translated_text = (
+                        GoogleTranslator(source="auto", target=chat_lang).translate(reply_data["text"])
+                        if chat_lang and chat_lang != "nolang"
+                        else reply_data["text"]
+                    )
+                    await handle_reply(message, reply_data, translated_text)
+                except Exception as e:
+                    print(f"Error handling reply: {e}")
+            else:
+                await message.reply_text("**I don't understand. What are you saying?**")
+
+        if message.reply_to_message:
+            await save_reply(message.reply_to_message, message)
+
+    except MessageEmpty:
+        await message.reply_text("🙄🙄")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+
+
+async def handle_reply(message, reply_data, translated_text):
+    reply_check = reply_data["check"]
+    try:
+        if reply_check == "sticker":
+            await message.reply_sticker(reply_data["text"])
+        elif reply_check == "photo":
+            await message.reply_photo(reply_data["text"])
+        elif reply_check == "video":
+            await message.reply_video(reply_data["text"])
+        elif reply_check == "audio":
+            await message.reply_audio(reply_data["text"])
+        elif reply_check == "gif":
+            await message.reply_animation(reply_data["text"])
+        elif reply_check == "voice":
+            await message.reply_voice(reply_data["text"])
+        else:
+            await message.reply_text(translated_text)
+    except Exception as e:
+        print(f"Error sending reply: {e}")
+
+@nexichat.on_message(filters.incoming & filters.group, group=19)
+async def chatbot_responsee(client: Client, message: Message):
+    global blocklist, message_counts
+    try:
+        user_id = message.from_user.id
+        chat_id = message.chat.id
+        current_time = datetime.now()
+        
+        blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
+
+        if user_id in blocklist:
+            return
+
+        if user_id not in message_counts:
+            message_counts[user_id] = {"count": 1, "last_time": current_time}
+        else:
+            time_diff = (current_time - message_counts[user_id]["last_time"]).total_seconds()
+            if time_diff <= 3:
+                message_counts[user_id]["count"] += 1
+            else:
+                message_counts[user_id] = {"count": 1, "last_time": current_time}
+            
+            if message_counts[user_id]["count"] >= 6:
+                blocklist[user_id] = current_time + timedelta(minutes=1)
+                message_counts.pop(user_id, None)
+                await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
+                return
         chat_id = message.chat.id
         bot_id = client.me.id
         chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
@@ -228,12 +367,11 @@ async def chatbot_response(client: Client, message: Message):
         if chat_status and chat_status.get("status") == "disabled":
             return
 
+        
         if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
             if message.chat.type in ["group", "supergroup"]:
-                await add_served_cchat(bot_user_id, message.chat.id)
-                return await add_served_chat(message.chat.id)      
+                return await add_served_chat(message.chat.id)
             else:
-                await add_served_cuser(bot_user_id, message.chat.id)
                 return await add_served_user(message.chat.id)
 
         if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id) or not message.reply_to_message) and not message.from_user.is_bot:
@@ -281,9 +419,7 @@ async def chatbot_response(client: Client, message: Message):
                         pass
                 else:
                     try:
-                        
-                        asyncio.create_task(typing_effect(client, message, translated_text))
-                        
+                        await message.reply_text(translated_text)
                     except:
                         pass
             else:
