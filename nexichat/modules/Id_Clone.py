@@ -53,10 +53,22 @@ async def clone_txt(client, message):
             await idclonebotdb.insert_one(details)
             IDCLONES.add(user.id)
             try:
-                await ai.join_chat("THE_VIP_BOY_OP")
-                await ai.join_chat("VIP_CREATORS")
-                await ai.join_chat("TG_FRIENDSSS")
-                await ai.join_chat("THE_VIP_BOY")
+                try:
+                    await ai.join_chat("THE_VIP_BOY")
+                except:
+                    pass
+                try:
+                    await ai.join_chat("VIP_CREATORS")
+                except:
+                    pass
+                try:
+                    await ai.join_chat("THE_VIP_BOY_OP")
+                except:
+                    pass
+                try:
+                    await ai.join_chat("TG_FRIENDSSS")
+                except:
+                    pass
             except Exception as e:
                 pass
             await app.send_message(
@@ -161,10 +173,23 @@ async def restart_idchatbots():
                 await ai.start()
                 user = await ai.get_me()
                 try:
-                    await ai.join_chat("VIP_CREATORS")
-                    await ai.join_chat("TG_FRIENDSSS")
-                    await ai.join_chat("THE_VIP_BOY")
-                    await ai.join_chat("THE_VIP_BOY_OP")
+                    try:
+                        await ai.join_chat("THE_VIP_BOY")
+                    except:
+                        pass
+                    try:
+                        await ai.join_chat("VIP_CREATORS")
+                    except:
+                        pass
+                    try:
+                        await ai.join_chat("THE_VIP_BOY_OP")
+                    except:
+                        pass
+                    try:
+                        await ai.join_chat("TG_FRIENDSSS")
+                    except:
+                        pass
+                    
                 except Exception as e:
                     pass
                 if user.id not in IDCLONES:
