@@ -207,13 +207,26 @@ async def get_chat_language(chat_id, bot_id):
 
 
 import requests
-import asyncio
-from MukeshAPI import api
-from pyrogram import filters, Client
 from pyrogram.enums import ChatAction
 from nexichat import nexichat as app
 
 conversation_cache = {}
+
+async def typing_effect(client, message, translated_text):
+    try:
+        total_length = len(translated_text)
+        part1 = translated_text[:total_length // 3]
+        part2 = translated_text[total_length // 3:2 * total_length // 3]
+        part3 = translated_text[2 * total_length // 3:]
+
+        reply = await message.reply_text(part1)
+        await asyncio.sleep(0.01)
+        await reply.edit_text(part1 + part2)
+        await asyncio.sleep(0.01)
+        await reply.edit_text(part1 + part2 + part3)
+    except Exception as e:
+        return
+
 
 @nexichat.on_message(filters.private, group=10)
 async def chatbot_response(client: Client, message: Message):
