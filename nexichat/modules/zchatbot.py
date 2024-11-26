@@ -347,7 +347,7 @@ async def handle_reply(message, reply_data, translated_text):
     except Exception as e:
         print(f"Error sending reply: {e}")
 
-@nexichat.on_message(filters.incoming & filters.group, group=19)
+@nexichat.on_message(filters.incoming & filters.group, group=29)
 async def chatbot_responsee(client: Client, message: Message):
     global blocklist, message_counts
     try:
