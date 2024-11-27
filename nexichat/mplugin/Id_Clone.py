@@ -111,42 +111,27 @@ async def clone_txt(client, message):
     else:
         await message.reply_text("**Provide a Pyrogram String Session after the /idclone **\n\n**Example:** `/idclone string session paste here`\n\n**Get a Pyrogram string session from here:-** [Click Here](https://t.me/VIP_CREATORS/1393) ")
 
-
-@Client.on_message(filters.command(["idcloned", "clonedid"]))
+@Client.on_message(filters.command("idcloned"))
 async def list_cloned_sessions(client, message):
     try:
-        cloned_bots = await idclonebotdb.find().to_list(length=None)
-        if not cloned_bots:
-            await message.reply_text("**No sessions have been cloned yet.**")
+        cloned_sessions = await idclonebotdb.find().to_list(length=None)
+        if not cloned_sessions:
+            await message.reply_text("No sessions have been cloned yet.")
             return
+        total_sessions = len(cloned_sessions)
+        text = f"**Total Cloned Sessions:** {total_sessions}\n\n"
+        for session in cloned_sessions:
+            text += f"**User ID:** `{session['user_id']}`\n"
+            text += f"**Name:** {session['name']}\n"
+            text += f"**Username:** @{session['username']}\n\n"
 
-        total_clones = len(cloned_bots)
-        text = f"**Total Cloned Sessions:** {total_clones}\n\n"
-        messages = []
-
-        for bot in cloned_bots:
-            text += (
-                f"**User ID:** `{bot['user_id']}`\n"
-                f"**Name:** {bot['name']}\n"
-                f"**Username:** @{bot['username']}\n\n"
-            )
-
-            if len(text) > 4000:
-                messages.append(text)
-                text = ""
-
-        if text:
-            messages.append(text)
-
-        for msg in messages:
-            if len(msg) > 4096:
-                paste_url = await VIPbin(msg)
-                await message.reply_text(f"**Check Out All User Cloned List👇👇**\n\n{paste_url}")
-            else:
-                await message.reply_text(msg)
-
+        if len(text) > 4096:
+            paste_url = await VIPbin(text)
+            await message.reply(f"**Check Out All User Cloned List👇👇**\n\n{paste_url}")
+            return
+        await message.reply_text(text)
     except Exception as e:
-        await message.reply_text(f"**An error occurred while listing cloned sessions:** `{str(e)}`")
+        await message.reply_text("**An error occurred while listing cloned sessions.**")
         
 
 @Client.on_message(
