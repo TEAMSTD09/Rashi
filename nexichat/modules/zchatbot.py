@@ -228,7 +228,7 @@ async def typing_effect(client, message, translated_text):
     except Exception as e:
         return
         
-@nexichat.on_message(filters.private, group=14)
+@nexichat.on_message(filters.private, group=13)
 async def chatbot_response(client: Client, message: Message):
     global blocklist, message_counts
     user_id = message.from_user.id
@@ -335,7 +335,7 @@ async def chatbot_response(client: Client, message: Message):
     except:
         return
                                           
-@nexichat.on_message(filters.incoming & filters.group, group=15)
+@nexichat.on_message(filters.incoming & filters.group, group=14)
 async def chatbot_responsee(client: Client, message: Message):
     global blocklist, message_counts
     try:
@@ -460,7 +460,7 @@ async def generate_ai_response(prompt):
     except requests.RequestException:
         return None
 
-@nexichat.on_message(filters.group, group=16)
+@nexichat.on_message(filters.group, group=15)
 async def group_chat_response(client: Client, message: Message):
     global blocklist, message_counts, user_conversations
     try:
