@@ -12,6 +12,28 @@ from config import API_HASH, API_ID, OWNER_ID
 from nexichat import CLONE_OWNERS
 from nexichat import nexichat as app, save_clonebot_owner, save_idclonebot_owner
 from nexichat import nexichat, db as mongodb
+import aiohttp
+
+BASE = "https://batbin.me/"
+
+
+async def post(url: str, *args, **kwargs):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, *args, **kwargs) as resp:
+            try:
+                data = await resp.json()
+            except Exception:
+                data = await resp.text()
+        return data
+
+
+async def VIPbin(text):
+    resp = await post(f"{BASE}api/v2/paste", data=text)
+    if not resp["success"]:
+        return
+    link = BASE + resp["message"]
+    return link
+
 
 IDCLONES = set()
 cloneownerdb = mongodb.cloneownerdb
@@ -105,12 +127,17 @@ async def list_cloned_sessions(client, message):
             text += f"**User ID:** `{bot['user_id']}`\n"
             text += f"**Name:** {bot['name']}\n"
             text += f"**Username:** @{bot['username']}\n\n"
-
+            
+            if len(text) > 4096:
+            paste_url = await VIPbin(text)
+            await message.reply(f"**Check Out All User Cloned List👇👇**\n\n{paste_url}")
+            return
         await message.reply_text(text)
     except Exception as e:
-        logging.exception(e)
+        
         await message.reply_text("**An error occurred while listing cloned sessions.**")
-
+    except:
+        return
 
 @app.on_message(
     filters.command(["delidclone", "delcloneid", "deleteidclone", "removeidclone"])
