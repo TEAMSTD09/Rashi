@@ -462,7 +462,7 @@ async def generate_ai_response(prompt):
 
 @nexichat.on_message(filters.group, group=15)
 async def group_chat_response(client: Client, message: Message):
-    global blocklist, message_counts, user_conversations
+    global blocklist, message_counts, conversation_cache
     try:
         user_id = message.from_user.id
         chat_id = message.chat.id
@@ -520,9 +520,15 @@ async def group_chat_response(client: Client, message: Message):
                             conversation_cache[chat_id].pop(0)
                         
                         return
-                except requests.RequestException as e:
+                except requests.RequestException:
                     return await message.reply_text("**I am busy now, I will talk later bye!**")
             else:
+                user_input = message.text
+                
+                if chat_id not in conversation_cache:
+                    conversation_cache[chat_id] = []
+
+                conversation_history = conversation_cache[chat_id]
                 prompt = "This is the given below conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool):\n\n"
                 for user_msg, ai_reply in conversation_history[-50:]:
                     prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
@@ -544,6 +550,7 @@ async def group_chat_response(client: Client, message: Message):
                             conversation_cache[chat_id].pop(0)
                         
                         return
-            
+                except requests.RequestException:
+                    return await message.reply_text("**I am busy now, I will talk later bye!**")
     except Exception as e:
         return
