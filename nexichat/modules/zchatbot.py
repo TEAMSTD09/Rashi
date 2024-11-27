@@ -1,4 +1,5 @@
 import random
+import config
 from pymongo import MongoClient
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
