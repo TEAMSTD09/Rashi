@@ -1,4 +1,5 @@
 import random
+import config
 from pymongo import MongoClient
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
@@ -454,7 +455,7 @@ async def get_user_conversation(chat_id, user_id):
 async def generate_ai_response(prompt):
    
     try:
-        base_url = "https://chatwithai.codesearch.workers.dev/?chat="
+        base_url = config.API
         response = requests.get(base_url + prompt)
         response.raise_for_status()
         json_response = response.json()
