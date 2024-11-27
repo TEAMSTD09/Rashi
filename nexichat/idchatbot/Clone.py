@@ -13,6 +13,28 @@ from nexichat import CLONE_OWNERS
 from nexichat import nexichat as app, save_clonebot_owner, save_idclonebot_owner
 from nexichat import db as mongodb
 from nexichat import nexichat as app
+import aiohttp
+
+BASE = "https://batbin.me/"
+
+
+async def post(url: str, *args, **kwargs):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, *args, **kwargs) as resp:
+            try:
+                data = await resp.json()
+            except Exception:
+                data = await resp.text()
+        return data
+
+
+async def VIPbin(text):
+    resp = await post(f"{BASE}api/v2/paste", data=text)
+    if not resp["success"]:
+        return
+    link = BASE + resp["message"]
+    return link
+    
 
 IDCLONES = set()
 cloneownerdb = mongodb.cloneownerdb
@@ -96,27 +118,39 @@ async def clone_txt(client, message):
 @Client.on_message(filters.command(["idcloned", "clonedid"], prefixes=[".", "/"]))
 async def list_cloned_sessions(client, message):
     try:
-        cloned_bots = idclonebotdb.find()
-        cloned_bots_list = await cloned_bots.to_list(length=None)
-        if not cloned_bots_list:
-            try:
-                await message.reply_text("**No sessions have been cloned yet.**")
-            except:
-                return
-
-        total_clones = len(cloned_bots_list)
-        text = f"**Total Cloned Sessions:** {total_clones}\n\n"
-        for bot in cloned_bots_list:
-            text += f"**User ID:** `{bot['user_id']}`\n"
-            text += f"**Name:** {bot['name']}\n"
-            text += f"**Username:** @{bot['username']}\n\n"
-
-        await message.reply_text(text)
-    except Exception as e:
-        try:
-            return await message.reply_text(f"**An error occurred while getting list of cloned id-chatbots**\n\n**Error:-** {e}")
-        except:
+        cloned_bots = await idclonebotdb.find().to_list(length=None)
+        if not cloned_bots:
+            await message.reply_text("**No sessions have been cloned yet.**")
             return
+
+        total_clones = len(cloned_bots)
+        text = f"**Total Cloned Sessions:** {total_clones}\n\n"
+        messages = []
+
+        for bot in cloned_bots:
+            text += (
+                f"**User ID:** `{bot['user_id']}`\n"
+                f"**Name:** {bot['name']}\n"
+                f"**Username:** @{bot['username']}\n\n"
+            )
+
+            if len(text) > 4000:
+                messages.append(text)
+                text = ""
+
+        if text:
+            messages.append(text)
+
+        for msg in messages:
+            if len(msg) > 4096:
+                paste_url = await VIPbin(msg)
+                await message.reply_text(f"**Check Out All User Cloned List👇👇**\n\n{paste_url}")
+            else:
+                await message.reply_text(msg)
+
+    except Exception as e:
+        await message.reply_text(f"**An error occurred while listing cloned sessions:** `{str(e)}`")
+
 
 @Client.on_message(
     filters.command(["delidclone", "delcloneid", "deleteidclone", "removeidclone"], prefixes=["."])
