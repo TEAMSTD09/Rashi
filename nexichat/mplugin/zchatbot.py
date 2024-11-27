@@ -133,17 +133,20 @@ async def list_blocked_words(client: Client, message: Message):
     except Exception as e:
         await message.reply_text(f"Error: {e}")
 
-async def is_url_present(text: str) -> bool:
+import re
+
+async def is_url_present_and_replace(text: str) -> str:
     url_pattern = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
-    return bool(re.search(url_pattern, text))
+    
+    return re.sub(url_pattern, "@VIP_CREATORS", text)
 
 async def save_reply(original_message: Message, reply_message: Message):
     global replies_cache
     try:
         if (original_message.text and 
-            (await is_abuse_present(original_message.text) or await is_url_present(original_message.text))) or \
+            (await is_abuse_present(original_message.text) or await is_url_present_and_replace(original_message.text))) or \
            (reply_message.text and 
-            (await is_abuse_present(reply_message.text) or await is_url_present(reply_message.text))):
+            (await is_abuse_present(reply_message.text) or await is_url_present_and_replace(reply_message.text))):
             return
         
         
@@ -205,8 +208,11 @@ async def get_reply(word: str):
             await remove_abusive_reply(reply)
     if not relevant_replies:
         relevant_replies = replies_cache
-    return random.choice(relevant_replies) if relevant_replies else None
-
+    
+    selected_reply = random.choice(relevant_replies) if relevant_replies else None
+    if selected_reply:
+        selected_reply["text"] = await is_url_present_and_replace(selected_reply["text"])
+    return selected_reply
 
 async def get_chat_language(chat_id, bot_id):
     chat_lang = await lang_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
