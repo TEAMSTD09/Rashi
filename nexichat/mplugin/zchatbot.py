@@ -426,8 +426,9 @@ async def generate_ai_response(prompt):
     except requests.RequestException:
         return None
 
-@Client.on_message(filters.group, group=15)
+@Client.on_message(filters.group, group=51)
 async def group_chat_response(client: Client, message: Message):
+    print(f"working @{client.me.username}")
     global blocklist, message_counts, conversation_cache
     try:
         user_id = message.from_user.id
@@ -455,6 +456,7 @@ async def group_chat_response(client: Client, message: Message):
                 return
 
         if client.me.username in message.text and message.text.startswith("@"):
+            print(f" successfully working @{client.me.username}")
             if message.reply_to_message:
                 if message.reply_to_message.from_user.id != client.me.id and message.reply_to_message.from_user.id != message.from_user.id:
                     return
