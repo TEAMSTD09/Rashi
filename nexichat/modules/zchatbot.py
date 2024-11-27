@@ -1,5 +1,4 @@
 import random
-import config
 from pymongo import MongoClient
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
@@ -280,7 +279,7 @@ async def chatbot_response(client: Client, message: Message):
                     prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
                 prompt += f"User: {user_input}\nAI:"
 
-                base_url = config.API
+                base_url = "https://chatwithai.codesearch.workers.dev/?chat="
                 try:
                     response = requests.get(base_url + prompt)
                     response.raise_for_status()
@@ -375,13 +374,7 @@ async def chatbot_responsee(client: Client, message: Message):
             else:
                 return await add_served_user(chat_id)
 
-        if (
-            not message.reply_to_message 
-            and not message.from_user.is_bot 
-            and not (message.reply_to_message 
-                     and (message.reply_to_message.from_user.is_bot or not message.reply_to_message.from_user.is_self)
-                    )):
-    
+        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id) or not message.reply_to_message) and not message.from_user.is_bot:
             reply_data = await get_reply(message.text)
 
             if reply_data:
@@ -445,7 +438,7 @@ async def chatbot_responsee(client: Client, message: Message):
             pass
     except Exception as e:
         return
-    
+
 
 conversation_histories = {}
 
@@ -538,6 +531,4 @@ async def group_chat_response(client: Client, message: Message):
         
 
     except Exception as e:
-        print(f"Error: {e}")
-
-
+        print(f"Errrror: {e}")
