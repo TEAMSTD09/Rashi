@@ -1,4 +1,4 @@
-import random
+tuimport random
 import config
 from pymongo import MongoClient
 from pyrogram import Client, filters
@@ -495,7 +495,7 @@ async def group_chat_response(client: Client, message: Message):
                         user_conversation.pop(0)
                     translated_text = ai_response
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
-                    await asyncio.create_task(typing_effect(client, message, translated_text)
+                    await asyncio.create_task(typing_effect(client, message, translated_text))
             return
     except Exception as e:
         return
