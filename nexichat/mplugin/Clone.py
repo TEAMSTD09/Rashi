@@ -10,6 +10,28 @@ from config import API_HASH, API_ID, OWNER_ID
 from nexichat import CLONE_OWNERS
 from nexichat import nexichat as app, save_clonebot_owner
 from nexichat import db as mongodb, nexichat
+import aiohttp
+
+BASE = "https://batbin.me/"
+
+
+async def post(url: str, *args, **kwargs):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, *args, **kwargs) as resp:
+            try:
+                data = await resp.json()
+            except Exception:
+                data = await resp.text()
+        return data
+
+
+async def VIPbin(text):
+    resp = await post(f"{BASE}api/v2/paste", data=text)
+    if not resp["success"]:
+        return
+    link = BASE + resp["message"]
+    return link
+
 
 CLONES = set()
 cloneownerdb = mongodb.cloneownerdb
@@ -103,11 +125,19 @@ async def list_cloned_bots(client, message):
             text += f"**Bot ID:** `{bot['bot_id']}`\n"
             text += f"**Bot Name:** {bot['name']}\n"
             text += f"**Bot Username:** @{bot['username']}\n\n"
-        await message.reply_text(text)
-    except Exception as e:
-        logging.exception(e)
-        await message.reply_text("**An error occurred while listing cloned bots.**")
 
+            if len(text) > 4096:
+            paste_url = await VIPbin(text)
+            await message.reply(f"**Check Out All Cloned Bot List👇👇**\n\n{paste_url}")
+            return
+        await message.reply_text(text)
+        
+    except Exception as e:
+        
+        await message.reply_text("**An error occurred while listing cloned bots.**")
+    except:
+        return
+        
 @Client.on_message(
     filters.command(["deletecloned", "delcloned", "delclone", "deleteclone", "removeclone", "cancelclone"])
 )
