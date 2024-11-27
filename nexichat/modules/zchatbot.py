@@ -494,7 +494,7 @@ async def group_chat_response(client: Client, message: Message):
                 await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
                 return
 
-        if client.me.username in message.text:
+        if client.me.username in message.text and message.text.startswith("@"):
             if message.reply_to_message:
                 if message.reply_to_message.from_user.id != client.me.id and message.reply_to_message.from_user.id != message.from_user.id:
                     return
