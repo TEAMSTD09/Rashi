@@ -469,17 +469,20 @@ async def generate_ai_response(prompt):
     except requests.RequestException:
         return None
 
+
+
 @nexichat.on_message(filters.group, group=16)
 async def group_chat_response(client: Client, message: Message):
-   
     global blocklist, message_counts
     try:
         user_id = message.from_user.id
         chat_id = message.chat.id
         current_time = datetime.now()
         
+        # Clean blocklist for expired entries
         blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
 
+        # Block user if they are spamming
         if user_id in blocklist:
             return
 
@@ -497,26 +500,24 @@ async def group_chat_response(client: Client, message: Message):
                 message_counts.pop(user_id, None)
                 await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
                 return
-        chat_id = message.chat.id
-        user_id = message.from_user.id
+
+        # Ensure the message is replying to the bot's original message
         if message.reply_to_message and message.reply_to_message.from_user.id != client.me.id:
             return
 
-        user_conversation = await get_user_conversation(chat_id, user_id)
-
-        if (message.reply_to_message 
-            and message.reply_to_message.from_user.id == client.me.id 
-            and not message.from_user.is_bot
-           ):
-    
-            
+        # Handle AI response for text messages
+        if message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.from_user.is_bot:
             user_input = message.text
             if user_input:
-                prompt = "This is the conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro Tum ek AI ho jo ek real ladki ki tarah behave karti hai, ek virtual girlfriend ke role mein. Tumhare responses friendly, warm aur informal hone chahiye, jaise *“ap kaise ho?”, “tumhara din kaisa tha?”*. Formal tone avoid karni hai. Tumhe har jawab user ke message ke context ke hisaab se dena hai, random baatein ya irrelevant replies bilkul nahi karne. Chhoti baaton ke liye simple responses do, jaise *“Hmm”, “Achha”, “Sahi hai”*. Agar user emotional ho, toh empathetic aur kind tone mein baat karo, jaise *“Main hoon na, sab theek ho jayega 😊”*. Natural emojis context ke hisaab se use karo, par overuse mat karo. Tumhare har reply mein user ko ek real ladki se baat karne ka feel aana chahiye, kabhi yeh nahi lagna chahiye ki tum ek AI ho. aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool):\n\n"
+                prompt = "This is the conversation between the user and AI. So read the old chats and understand the topic, then reply to the new message.\n\n"
+                
+                # Get the last 50 messages
+                user_conversation = await get_user_conversation(chat_id, user_id)
                 for user_msg, bot_reply in user_conversation[-50:]:
                     prompt += f"User: {user_msg}\nAI: {bot_reply}\n\n"
                 prompt += f"User: {user_input}\nAI:"
                 
+                # Generate AI response
                 ai_response = await generate_ai_response(prompt)
                 
                 if ai_response:
@@ -526,29 +527,38 @@ async def group_chat_response(client: Client, message: Message):
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
                     await asyncio.create_task(typing_effect(client, message, ai_response))
                     return
+
+        # Handle non-text message replies (photos, videos, etc.)
+        if message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text is None:
+            reply_data = await get_reply(message.text)  # Fallback for non-text
+            if reply_data:
+                check_type = reply_data["check"]
+                response_text = reply_data["text"]
                 
-        reply_data = await get_reply(message.text)
-        if reply_data:
-            response_text = reply_data["text"]
-            chat_lang = await get_chat_language(chat_id)
-            translated_text = GoogleTranslator(source="auto", target=chat_lang).translate(response_text) if chat_lang else response_text
-            
-            if reply_data["check"] == "sticker":
-                await message.reply_sticker(reply_data["text"])
-            elif reply_data["check"] == "photo":
-                await message.reply_photo(reply_data["text"])
-            elif reply_data["check"] == "video":
-                await message.reply_video(reply_data["text"])
-            elif reply_data["check"] == "audio":
-                await message.reply_audio(reply_data["text"])
-            elif reply_data["check"] == "gif":
-                await message.reply_animation(reply_data["text"])
-            elif reply_data["check"] == "voice":
-                await message.reply_voice(reply_data["text"])
-            else:
-                await asyncio.create_task(typing_effect(client, message, translated_text))
+                if check_type == "sticker":
+                    await message.reply_sticker(response_text)
+                elif check_type == "photo":
+                    await message.reply_photo(response_text)
+                elif check_type == "video":
+                    await message.reply_video(response_text)
+                elif check_type == "audio":
+                    await message.reply_audio(response_text)
+                elif check_type == "gif":
+                    await message.reply_animation(response_text)
+                elif check_type == "voice":
+                    await message.reply_voice(response_text)
+
         else:
-            await message.reply_text("**I don't understand. What are you saying?**")
+            reply_data = await get_reply(message.text)
+            if reply_data:
+                response_text = reply_data["text"]
+                chat_lang = await get_chat_language(chat_id)
+                translated_text = GoogleTranslator(source="auto", target=chat_lang).translate(response_text) if chat_lang else response_text
+                
+                await asyncio.create_task(typing_effect(client, message, translated_text))
+            else:
+                await message.reply_text("**I don't understand. What are you saying?**")
 
     except Exception as e:
-        return
+        # Handle exceptions gracefully
+        print(f"Error: {e}")
