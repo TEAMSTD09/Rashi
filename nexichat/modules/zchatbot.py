@@ -528,8 +528,6 @@ async def group_chat_response(client: Client, message: Message):
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
                     await asyncio.create_task(typing_effect(client, message, ai_response))
             return
-
-        
-
+            
     except Exception as e:
-        print(f"Errrror: {e}")
+        return
