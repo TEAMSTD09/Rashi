@@ -430,7 +430,7 @@ async def generate_ai_response(prompt):
 async def group_chat_response(client: Client, message: Message):
     global blocklist, message_counts, conversation_cache
     try:
-        user_id = message.from_user.id
+        """user_id = message.from_user.id
         chat_id = message.chat.id
         current_time = datetime.now()
 
@@ -452,9 +452,9 @@ async def group_chat_response(client: Client, message: Message):
                 blocklist[user_id] = current_time + timedelta(minutes=1)
                 message_counts.pop(user_id, None)
                 await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
-                return
-
-        if client.me.username in message.text and message.text.startswith("@"):
+                return"""
+        print(f"try tobwork wth @{client.me.username}")
+        if message.text and client.me.username in message.text and message.text.startswith("@"):
             print(f" successfully working @{client.me.username}")
             if message.reply_to_message:
                 if message.reply_to_message.from_user.id != client.me.id and message.reply_to_message.from_user.id != message.from_user.id:
