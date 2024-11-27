@@ -133,11 +133,17 @@ async def list_blocked_words(client: Client, message: Message):
     except Exception as e:
         await message.reply_text(f"Error: {e}")
 
+async def is_url_present(text: str) -> bool:
+    url_pattern = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+    return bool(re.search(url_pattern, text))
+
 async def save_reply(original_message: Message, reply_message: Message):
     global replies_cache
     try:
-        if (original_message.text and await is_abuse_present(original_message.text)) or \
-           (reply_message.text and await is_abuse_present(reply_message.text)):
+        if (original_message.text and 
+            (await is_abuse_present(original_message.text) or await is_url_present(original_message.text))) or \
+           (reply_message.text and 
+            (await is_abuse_present(reply_message.text) or await is_url_present(reply_message.text))):
             return
         
         reply_data = {
