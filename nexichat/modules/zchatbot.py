@@ -525,8 +525,9 @@ async def group_chat_response(client: Client, message: Message):
                     user_conversation.append((message.text, ai_response))
                     if len(user_conversation) > 50:
                         user_conversation.pop(0)
+                    translated_text = ai_response
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
-                    await asyncio.create_task(typing_effect(client, message, ai_response))
+                    await asyncio.create_task(typing_effect(client, message, translated_text))
             return
             
     except Exception as e:
