@@ -428,7 +428,6 @@ async def generate_ai_response(prompt):
 
 @Client.on_message(filters.group, group=51)
 async def group_chat_response(client: Client, message: Message):
-    print(f"working @{client.me.username}")
     global blocklist, message_counts, conversation_cache
     try:
         user_id = message.from_user.id
