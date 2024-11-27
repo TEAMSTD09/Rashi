@@ -444,40 +444,18 @@ async def get_user_conversation(chat_id, user_id):
 
 async def generate_ai_response(prompt):
     try:
-        response = requests.get(config.API + prompt)
+        base_url = config.API
+        response = requests.get(base_url + prompt)
         response.raise_for_status()
-        return response.json().get("data", "").strip()
+        json_response = response.json()
+        return json_response.get("data", "").strip()
     except requests.RequestException:
         return None
-
+        
 @Client.on_message(filters.group, group=12)
 async def group_chat_response(client: Client, message: Message):
-    global blocklist, message_counts
-    try:"""
-        user_id = message.from_user.id
-        chat_id = message.chat.id
-        current_time = datetime.now()
-
-        blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
-
-        if user_id in blocklist:
-            return
-
-        if user_id not in message_counts:
-            message_counts[user_id] = {"count": 1, "last_time": current_time}
-        else:
-            time_diff = (current_time - message_counts[user_id]["last_time"]).total_seconds()
-            if time_diff <= 3:
-                message_counts[user_id]["count"] += 1
-            else:
-                message_counts[user_id] = {"count": 1, "last_time": current_time}
-            
-            if message_counts[user_id]["count"] >= 6:
-                blocklist[user_id] = current_time + timedelta(minutes=1)
-                message_counts.pop(user_id, None)
-                await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
-                return"""
-
+    global blocklist, message_counts, conversation_histories
+    try:
         if client.me.username in message.text and message.text.startswith("@"):
             if message.reply_to_message:
                 if message.reply_to_message.from_user.id not in [client.me.id, message.from_user.id]:
