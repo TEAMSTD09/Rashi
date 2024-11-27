@@ -429,7 +429,7 @@ async def generate_ai_response(prompt):
 
 @Client.on_message(filters.group, group=18)
 async def group_chat_response(client: Client, message: Message):
-    global blocklist, message_counts, user_conversations
+    global blocklist, message_counts, conversation_histories
     try:
         user_id = message.from_user.id
         chat_id = message.chat.id
@@ -497,8 +497,5 @@ async def group_chat_response(client: Client, message: Message):
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
                     await asyncio.create_task(typing_effect(client, message, translated_text)
             return
-
-        
-
     except Exception as e:
         return
