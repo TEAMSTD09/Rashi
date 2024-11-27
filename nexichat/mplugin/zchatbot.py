@@ -227,7 +227,7 @@ async def typing_effect(client, message, translated_text):
 
              
 
-@Client.on_message(filters.private, group=12)
+@Client.on_message(filters.private, group=16)
 async def chatbot_response(client: Client, message: Message):
     user_id = message.from_user.id
     chat_id = message.chat.id
@@ -323,7 +323,7 @@ async def chatbot_response(client: Client, message: Message):
         return
 
 
-@Client.on_message(filters.incoming & filters.group, group=13)
+@Client.on_message(filters.incoming & filters.group, group=17)
 async def chatbot_responsee(client: Client, message: Message):
     try:
         chat_id = message.chat.id
@@ -427,7 +427,7 @@ async def generate_ai_response(prompt):
     except requests.RequestException:
         return None
 
-@Client.on_message(filters.group, group=17)
+@Client.on_message(filters.group, group=18)
 async def group_chat_response(client: Client, message: Message):
     global blocklist, message_counts, user_conversations
     try:
@@ -475,8 +475,9 @@ async def group_chat_response(client: Client, message: Message):
                     user_conversation.append((user_input, ai_response))
                     if len(user_conversation) > 50:
                         user_conversation.pop(0)
+                    translated_text = ai_response
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
-                    await asyncio.create_task(typing_effect(client, message, ai_response))
+                    await asyncio.create_task(typing_effect(client, message, translated_text))
                 return
             else:
                 prompt = "This is the given below conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool):\n\n"
@@ -492,8 +493,9 @@ async def group_chat_response(client: Client, message: Message):
                     user_conversation.append((message.text, ai_response))
                     if len(user_conversation) > 50:
                         user_conversation.pop(0)
+                    translated_text = ai_response
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
-                    await asyncio.create_task(typing_effect(client, message, ai_response))
+                    await asyncio.create_task(typing_effect(client, message, translated_text)
             return
 
         
