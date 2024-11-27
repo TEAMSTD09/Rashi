@@ -210,8 +210,8 @@ async def get_reply(word: str):
         relevant_replies = replies_cache
     
     selected_reply = random.choice(relevant_replies) if relevant_replies else None
-    if selected_reply:
-        selected_reply["text"] = await is_url_present_and_replace(selected_reply["text"])
+    #if selected_reply:
+        #selected_reply["text"] = await is_url_present_and_replace(selected_reply["text"])
     return selected_reply
 
 async def get_chat_language(chat_id, bot_id):
