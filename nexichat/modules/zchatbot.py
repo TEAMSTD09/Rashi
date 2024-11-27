@@ -212,6 +212,7 @@ from pyrogram.enums import ChatAction
 from nexichat import nexichat as app
 
 conversation_cache = {}
+conversation_histories = {}
 
 async def typing_effect(client, message, translated_text):
     try:
@@ -230,7 +231,7 @@ async def typing_effect(client, message, translated_text):
         
 @nexichat.on_message(filters.private, group=13)
 async def chatbot_response(client: Client, message: Message):
-    global blocklist, message_counts
+    global blocklist, message_counts, conversation_cache
     user_id = message.from_user.id
     chat_id = message.chat.id
     user_input = None
@@ -280,7 +281,7 @@ async def chatbot_response(client: Client, message: Message):
                     prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
                 prompt += f"User: {user_input}\nAI:"
 
-                base_url = "https://chatwithai.codesearch.workers.dev/?chat="
+                base_url = config.API
                 try:
                     response = requests.get(base_url + prompt)
                     response.raise_for_status()
@@ -441,7 +442,6 @@ async def chatbot_responsee(client: Client, message: Message):
         return
 
 
-conversation_histories = {}
 
 async def get_user_conversation(chat_id, user_id):
     if chat_id not in conversation_histories:
@@ -494,41 +494,56 @@ async def group_chat_response(client: Client, message: Message):
                     return
 
                 user_input = message.text
-                prompt = "This is the given below conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool):\n\n"
                 
-                user_conversation = await get_user_conversation(chat_id, user_id)
-                for user_msg, bot_reply in user_conversation[-50:]:
-                    prompt += f"User: {user_msg}\nAI: {bot_reply}\n\n"
+                if chat_id not in conversation_cache:
+                    conversation_cache[chat_id] = []
 
+                conversation_history = conversation_cache[chat_id]
+                prompt = "This is the given below conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool):\n\n"
+                for user_msg, ai_reply in conversation_history[-50:]:
+                    prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
                 prompt += f"User: {user_input}\nAI:"
-                
-                ai_response = await generate_ai_response(prompt)
-                
-                if ai_response:
-                    user_conversation.append((user_input, ai_response))
-                    if len(user_conversation) > 50:
-                        user_conversation.pop(0)
-                    await client.send_chat_action(chat_id, ChatAction.TYPING)
-                    await asyncio.create_task(typing_effect(client, message, ai_response))
-                return
+
+                base_url = config.API
+                try:
+                    response = requests.get(base_url + prompt)
+                    response.raise_for_status()
+
+                    json_response = response.json()
+                    result = json_response.get("data", "").strip()
+
+                    if result:
+                        await client.send_chat_action(message.chat.id, ChatAction.TYPING)
+                        asyncio.create_task(typing_effect(client, message, result))
+                        conversation_cache[chat_id].append((user_input, result))
+                        if len(conversation_cache[chat_id]) > 50:
+                            conversation_cache[chat_id].pop(0)
+                        
+                        return
+                except requests.RequestException as e:
+                    return await message.reply_text("**I am busy now, I will talk later bye!**")
             else:
                 prompt = "This is the given below conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool):\n\n"
-                
-                user_conversation = await get_user_conversation(chat_id, user_id)
-                for user_msg, bot_reply in user_conversation[-50:]:
-                    prompt += f"User: {user_msg}\nAI: {bot_reply}\n\n"
-                prompt += f"User: {message.text}\nAI:"
-                
-                ai_response = await generate_ai_response(prompt)
-                
-                if ai_response:
-                    user_conversation.append((message.text, ai_response))
-                    if len(user_conversation) > 50:
-                        user_conversation.pop(0)
-                    translated_text = ai_response
-                    await client.send_chat_action(chat_id, ChatAction.TYPING)
-                    await asyncio.create_task(typing_effect(client, message, translated_text))
-            return
+                for user_msg, ai_reply in conversation_history[-50:]:
+                    prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
+                prompt += f"User: {user_input}\nAI:"
+
+                base_url = config.API
+                try:
+                    response = requests.get(base_url + prompt)
+                    response.raise_for_status()
+
+                    json_response = response.json()
+                    result = json_response.get("data", "").strip()
+
+                    if result:
+                        await client.send_chat_action(message.chat.id, ChatAction.TYPING)
+                        asyncio.create_task(typing_effect(client, message, result))
+                        conversation_cache[chat_id].append((user_input, result))
+                        if len(conversation_cache[chat_id]) > 50:
+                            conversation_cache[chat_id].pop(0)
+                        
+                        return
             
     except Exception as e:
         return
