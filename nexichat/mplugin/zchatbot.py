@@ -429,12 +429,13 @@ async def generate_ai_response(prompt):
 @Client.on_message(filters.group, group=51)
 async def group_chat_response(client: Client, message: Message):
     global blocklist, message_counts, conversation_cache
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+    current_time = datetime.now()
     try:
-        """user_id = message.from_user.id
-        chat_id = message.chat.id
-        current_time = datetime.now()
+        
 
-        blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
+        """blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
 
         if user_id in blocklist:
             return
