@@ -259,6 +259,8 @@ async def chatbot_response(client: Client, message: Message):
                 message_counts.pop(user_id, None)
                 await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
                 return
+    except:
+        pass
     try:
         chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
         if chat_status and chat_status.get("status") == "disabled":
