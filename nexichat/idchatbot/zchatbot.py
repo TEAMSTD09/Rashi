@@ -1,4 +1,5 @@
 import random
+import re
 import config
 from datetime import datetime, timedelta
 from pymongo import MongoClient
@@ -133,20 +134,27 @@ async def list_blocked_words(client: Client, message: Message):
     except Exception as e:
         await message.reply_text(f"Error: {e}")
 
-import re
 
 async def is_url_present_and_replace(text: str) -> str:
     url_pattern = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
     
     return re.sub(url_pattern, "@VIP_CREATORS", text)
 
+async def is_url_present(text: str) -> bool:
+    
+    url_pattern = re.compile(
+        r"(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)|"
+        r"(www\.[a-zA-Z0-9-]+\.[a-zA-Z]{2,})"
+    )
+    return bool(url_pattern.search(text))
+    
 async def save_reply(original_message: Message, reply_message: Message):
     global replies_cache
     try:
         if (original_message.text and 
-            (await is_abuse_present(original_message.text) or await is_url_present_and_replace(original_message.text))) or \
+            (await is_abuse_present(original_message.text) or await is_url_present(original_message.text))) or \
            (reply_message.text and 
-            (await is_abuse_present(reply_message.text) or await is_url_present_and_replace(reply_message.text))):
+            (await is_abuse_present(reply_message.text) or await is_url_present(reply_message.text))):
             return
 
         reply_data = {
