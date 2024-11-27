@@ -453,7 +453,7 @@ async def group_chat_response(client: Client, message: Message):
                 message_counts.pop(user_id, None)
                 await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
                 return"""
-        print(f"try tobwork wth @{client.me.username}")
+        
         if message.text and client.me.username in message.text and message.text.startswith("@"):
             print(f" successfully working @{client.me.username}")
             if message.reply_to_message:
@@ -491,7 +491,7 @@ async def group_chat_response(client: Client, message: Message):
                     return await message.reply_text("**I am busy now, I will talk later bye!**")
             else:
                 user_input = message.text
-                
+                print(f"working here = {user_input}")
                 if chat_id not in conversation_cache:
                     conversation_cache[chat_id] = []
 
@@ -503,6 +503,7 @@ async def group_chat_response(client: Client, message: Message):
 
                 base_url = config.API
                 try:
+                    print(f"now herebi am")
                     response = requests.get(base_url + prompt)
                     response.raise_for_status()
 
@@ -510,6 +511,7 @@ async def group_chat_response(client: Client, message: Message):
                     result = json_response.get("data", "").strip()
 
                     if result:
+                        print(f"got rejult now = {result}")
                         await client.send_chat_action(message.chat.id, ChatAction.TYPING)
                         asyncio.create_task(typing_effect(client, message, result))
                         conversation_cache[chat_id].append((user_input, result))
