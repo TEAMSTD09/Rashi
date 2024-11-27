@@ -452,7 +452,7 @@ async def generate_ai_response(prompt):
     except requests.RequestException:
         return None
         
-@Client.on_message(filters.group, group=12)
+@Client.on_message(filters.incoming & filters.group, group=12)
 async def group_chat_response(client: Client, message: Message):
     global blocklist, message_counts, conversation_histories
     try:
