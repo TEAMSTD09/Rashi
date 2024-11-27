@@ -504,7 +504,11 @@ async def group_chat_response(client: Client, message: Message):
 
         user_conversation = await get_user_conversation(chat_id, user_id)
 
-        if message.reply_to_message:
+        if (message.reply_to_message 
+            and message.reply_to_message.from_user.id == client.me.id 
+            and not message.from_user.is_bot
+           ):
+    
             
             user_input = message.text
             if user_input:
