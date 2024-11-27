@@ -230,7 +230,7 @@ async def typing_effect(client, message, translated_text):
 
 
 
-@Client.on_message(filters.private, group=10)
+@Client.on_message(filters.private, group=-10)
 async def chatbot_response(client: Client, message: Message):
     user_id = message.from_user.id
     chat_id = message.chat.id
@@ -350,7 +350,7 @@ async def chatbot_response(client: Client, message: Message):
         return
         
 
-@Client.on_message(filters.incoming & filters.group, group=11)
+@Client.on_message(filters.incoming & filters.group, group=-11)
 async def chatbot_responsee(client: Client, message: Message):
     try:
         chat_id = message.chat.id
@@ -452,7 +452,7 @@ async def generate_ai_response(prompt):
     except requests.RequestException:
         return None
 
-@Client.on_message(filters.group, group=12)
+@Client.on_message(filters.group, group=-12)
 async def group_chat_response(client: Client, message: Message):
     global blocklist, message_counts, conversation_cache
     try:
