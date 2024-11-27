@@ -126,17 +126,14 @@ async def list_cloned_bots(client, message):
             text += f"**Bot Name:** {bot['name']}\n"
             text += f"**Bot Username:** @{bot['username']}\n\n"
 
-            if len(text) > 4096:
+        if len(text) > 4096:
             paste_url = await VIPbin(text)
             await message.reply(f"**Check Out All Cloned Bot List👇👇**\n\n{paste_url}")
             return
         await message.reply_text(text)
-        
     except Exception as e:
         
         await message.reply_text("**An error occurred while listing cloned bots.**")
-    except:
-        return
         
 @Client.on_message(
     filters.command(["deletecloned", "delcloned", "delclone", "deleteclone", "removeclone", "cancelclone"])
