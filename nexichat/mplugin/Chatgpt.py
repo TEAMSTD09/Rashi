@@ -1,4 +1,5 @@
 import requests
+import config
 import asyncio
 from MukeshAPI import api
 from pyrogram import filters, Client
@@ -67,7 +68,7 @@ async def chatgpt_chat(client, message):
         pass
 
     try:
-        base_url = "https://chatwithai.codesearch.workers.dev/?chat="
+        base_url = config.API
         response = requests.get(base_url + prompt)
         if response.status_code == 200:
             json_response = response.json()
