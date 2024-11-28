@@ -357,7 +357,7 @@ async def chatbot_response(client: Client, message: Message):
     except:
         return
                                           
-@nexichat.on_message(filters.incoming & filters.group, group=17)
+@nexichat.on_message(filters.incoming & filters.group, group=-17)
 async def chatbot_responsee(client: Client, message: Message):
     global blocklist, message_counts
     try:
@@ -478,7 +478,7 @@ async def group_chat_response(client: Client, message: Message):
 
         blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
 
-        if client.me.username in message.text and message.text.startswith("@"):
+        if client.me.username in message.text and message.text.startswith("@") and if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id) or not message.reply_to_message) and not message.from_user.is_bot and message.text:
             if user_id not in message_counts:
                 message_counts[user_id] = {"count": 1, "last_time": current_time}
             else:
