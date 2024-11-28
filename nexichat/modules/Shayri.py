@@ -143,8 +143,8 @@ async def restart_nexichat():
 scheduler.add_job(restart_nexichat, trigger="cron", hour=0, minute=0)
 scheduler.add_job(restart_nexichat, trigger="cron", hour=7, minute=0)
 scheduler.add_job(restart_nexichat, trigger="cron", hour=12, minute=0)
-scheduler.add_job(restart_nexichat, trigger="cron", hour=15, minute=0)
-scheduler.add_job(restart_nexichat, trigger="cron", hour=18, minute=0)
-scheduler.add_job(restart_nexichat, trigger="cron", hour=21, minute=0)
+scheduler.add_job(restart_nexichat, trigger="cron", hour=16, minute=0)
+#scheduler.add_job(restart_nexichat, trigger="cron", hour=18, minute=0)
+scheduler.add_job(restart_nexichat, trigger="cron", hour=20, minute=0)
 scheduler.start()
 
