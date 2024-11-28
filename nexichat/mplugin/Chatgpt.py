@@ -76,7 +76,7 @@ async def chatgpt_chat(client, message):
             if "data" in json_response:
                 reply_text = json_response["data"].strip()
                 if reply_text:
-                    if len(result) <= 500 and len(user_input) <= 500:
+                    if len(reply_text) <= 500 and len(user_input) <= 500:
                         conversation_cache[user_id].append((user_input, reply_text))
                     if len(conversation_cache[user_id]) > 50:
                         conversation_cache[user_id].pop(0)
