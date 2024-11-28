@@ -1,4 +1,5 @@
 from pyrogram import Client, filters
+import config
 import requests
 from pyrogram.types import Message
 from nexichat import nexichat as app, mongo, db
@@ -38,7 +39,7 @@ async def store_messages(client, message: Message):
 
         message_cache[chat_id].append(message)
 
-        if len(message_cache[chat_id]) >= 30:
+        if len(message_cache[chat_id]) >= 70:
             history = "\n\n".join(
                 [f"Text: {msg.text}..." for msg in message_cache[chat_id]]
             )
@@ -54,7 +55,7 @@ async def store_messages(client, message: Message):
             Lang code :- ""
             Provide only overall [Lang Name and Lang Code] in the above format. Do not provide anything else.
             """
-            base_url = "https://chatwithai.codesearch.workers.dev/?chat="
+            base_url = config.API
             response = requests.get(base_url + user_input)
             response.raise_for_status()
             json_response = response.json()
