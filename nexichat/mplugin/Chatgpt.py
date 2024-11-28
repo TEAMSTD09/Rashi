@@ -59,8 +59,9 @@ async def chatgpt_chat(client, message):
         await client.send_chat_action(message.chat.id, ChatAction.TYPING)
         result = response.get("results")
         if result:
-            conversation_cache[user_id].append((user_input, result))
-            if len(conversation_cache[user_id]) > 20:
+            if len(result) <= 500 and len(user_input) <= 500:
+                conversation_cache[user_id].append((user_input, result))
+            if len(conversation_cache[user_id]) > 50:
                 conversation_cache[user_id].pop(0)
             await message.reply_text(result, quote=True)
             return
@@ -75,8 +76,9 @@ async def chatgpt_chat(client, message):
             if "data" in json_response:
                 reply_text = json_response["data"].strip()
                 if reply_text:
-                    conversation_cache[user_id].append((user_input, reply_text))
-                    if len(conversation_cache[user_id]) > 15:
+                    if len(result) <= 500 and len(user_input) <= 500:
+                        conversation_cache[user_id].append((user_input, reply_text))
+                    if len(conversation_cache[user_id]) > 50:
                         conversation_cache[user_id].pop(0)
                     asyncio.create_task(typing_effect(client, message, reply_text))
                     #await message.reply_text(reply_text, quote=True)
