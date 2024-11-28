@@ -244,7 +244,7 @@ async def stats(client, message):
             if entity.is_bot:
                 bots += 1
         unread_mentions += dialog.unread_mentions_count
-        unread += dialog.unread_count
+        #unread += dialog.unread_count
 
     stop_time = time.time() - start_time
     full_name = message.from_user.first_name
@@ -263,7 +263,7 @@ async def stats(client, message):
     response += (
         f"   ★ `Admin Rights: {admin_in_broadcast_channels - creator_in_channels}` \n"
     )
-    response += f"**Unread:** {unread} \n"
+    #response += f"**Unread:** {unread} \n"
     response += f"**Unread Mentions:** {unread_mentions} \n\n"
     response += f"📌 __It Took:__ {stop_time:.02f}s \n"
     await ok.edit(response)
