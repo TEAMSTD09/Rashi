@@ -397,7 +397,7 @@ async def chatbot_responsee(client: Client, message: Message):
             else:
                 return await add_served_user(chat_id)
 
-        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id) or not message.reply_to_message) and not message.from_user.is_bot:
+        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id) or not message.reply_to_message) and not message.from_user.is_bot and not message.text:
             reply_data = await get_reply(message.text)
 
             if reply_data:
