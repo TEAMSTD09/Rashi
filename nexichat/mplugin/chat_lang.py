@@ -1,4 +1,5 @@
 from pyrogram import Client, filters
+import config
 import requests
 from pyrogram.types import Message
 from nexichat import nexichat as app, mongo, db
@@ -55,7 +56,7 @@ async def store_messages(client, message: Message):
             Provide only overall [Lang Name and Lang Code] in the above format. Do not provide anything else.
             """
             
-            base_url = "https://chatwithai.codesearch.workers.dev/?chat="
+            base_url = config.API
             response = requests.get(base_url + user_input)
             response.raise_for_status()
             json_response = response.json()
