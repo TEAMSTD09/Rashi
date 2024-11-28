@@ -39,7 +39,7 @@ async def store_messages(client, message: Message):
 
         message_cache[chat_id].append(message)
 
-        if len(message_cache[chat_id]) >= 30:
+        if len(message_cache[chat_id]) >= 70:
             history = "\n\n".join(
                 [f"Text: {msg.text}..." for msg in message_cache[chat_id]]
             )
