@@ -17,4 +17,4 @@ UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 SUPPORT_GRP = "TG_FRIENDSS"
 UPDATE_CHNL = "VIP_CREATORS"
 OWNER_USERNAME = "THE_VIP_BOY"
-API = getenv("API", "")
+API = getenv("API", "https://chatwithai.codesearch.workers.dev/?chat=")
