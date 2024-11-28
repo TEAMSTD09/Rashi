@@ -152,13 +152,18 @@ async def is_url_present(text: str) -> bool:
 async def save_reply(original_message: Message, reply_message: Message):
     global replies_cache
     try:
-        if (
-            await is_abuse_present(original_message.text)
-            or await is_url_present(original_message.text)
-            or await is_abuse_present(reply_message.text)
-            or await is_url_present(reply_message.text)
-        ):
-            return
+        if original_message == original_message.text:
+            try:
+                if (await is_abuse_present(original_message.text) or await is_url_present(original_message.text)):
+                    return
+            except:
+                pass
+        if reply_message == reply_message.text:
+            try:
+                if (await is_abuse_present(reply_message.text) or await is_url_present(reply_message.text)):
+                    return
+            except:
+                pass
         
         reply_data = {
             "word": original_message.text,
