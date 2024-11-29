@@ -73,7 +73,7 @@ async def anony_boot():
         LOGGER.error(f"Failed to set bot commands: {ex}")
     
     LOGGER.info(f"@{nexichat.username} Started.")
-    
+    await asyncio.sleep(5)
     await idle()
 
 
