@@ -530,7 +530,14 @@ async def group_chat_response(client: Client, message: Message):
 
                 json_response = response.json()
                 result = json_response.get("data", "").strip()
-
+                
+                if "413" in str(result) or "The request could not be satisfied" in str(result):
+                    
+                    conversation_cache[chat_id].pop(user_id, None)
+                    user_data_cache.pop(user_id, None)
+                    return await message.reply_text(
+                        "**Your chat history was too long, so I cleared it. Let's start fresh!**"
+                    )
                 if result:
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
                     asyncio.create_task(typing_effect(client, message, result))
