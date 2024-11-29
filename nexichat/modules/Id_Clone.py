@@ -219,7 +219,8 @@ async def restart_idchatbots():
 
                 logging.info(f"Successfully restarted session for: @{user.username or user.first_name}")
             except Exception as e:
-                logging.exception(f"Error while restarting session: {string_session}. invalid session.")
+                await nexichat.send_message(OWNER_ID, f"**This String Se3ssion May Be Dead, Remove It.**\n\n`{string_session}`\n\n**Remove it by /delidclone**")
+                
                 #await idclonebotdb.delete_one({"session": string_session})
                 pass
         
