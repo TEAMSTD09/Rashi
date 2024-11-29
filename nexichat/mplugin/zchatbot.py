@@ -264,6 +264,7 @@ async def chatbot_response(client: Client, message: Message):
     user_id = message.from_user.id
     chat_id = message.chat.id
     user_input = None
+    bot_id = client.me.id
 
     try:
         chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
