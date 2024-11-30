@@ -493,7 +493,7 @@ async def group_chat_response(client: Client, message: Message):
         user_id = message.from_user.id if message.from_user else message.chat.id
         chat_id = message.chat.id
         current_time = datetime.now()
-        user_input = None
+        user_input = message.text
 
         blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
         if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
