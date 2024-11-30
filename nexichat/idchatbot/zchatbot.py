@@ -1,11 +1,10 @@
 import random
 import re
 import config
-from datetime import datetime, timedelta
 from pymongo import MongoClient
+from datetime import datetime, timedelta
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
-from pyrogram.errors import UserBannedInChannel
 from pyrogram.enums import ChatAction, ChatMemberStatus as CMS
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
 from deep_translator import GoogleTranslator
@@ -134,11 +133,13 @@ async def list_blocked_words(client: Client, message: Message):
     except Exception as e:
         await message.reply_text(f"Error: {e}")
 
+import re
 
 async def is_url_present_and_replace(text: str) -> str:
     url_pattern = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
     
     return re.sub(url_pattern, "@VIP_CREATORS", text)
+
 
 async def is_url_present(text: str) -> bool:
     
@@ -163,7 +164,7 @@ async def save_reply(original_message: Message, reply_message: Message):
                     return
             except:
                 pass
-
+        
         reply_data = {
             "word": original_message.text,
             "text": None,
@@ -211,8 +212,6 @@ async def remove_abusive_reply(reply_data):
     await chatai.delete_one(reply_data)
     replies_cache = [reply for reply in replies_cache if reply != reply_data]
 
-
-
 async def get_reply(word: str):
     global replies_cache
     if not replies_cache:
@@ -229,7 +228,7 @@ async def get_reply(word: str):
     if selected_reply:
         selected_reply["text"] = await is_url_present_and_replace(selected_reply["text"])
     return selected_reply
-    
+
 async def get_chat_language(chat_id, bot_id):
     chat_lang = await lang_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
     return chat_lang["language"] if chat_lang and "language" in chat_lang else None
@@ -254,44 +253,19 @@ async def typing_effect(client, message, translated_text):
         await reply.edit_text(part1 + part2)
         await asyncio.sleep(0.01)
         await reply.edit_text(part1 + part2 + part3)
-    except:
+    except Exception as e:
         return
 
+             
 
-
-@Client.on_message(filters.private, group=-10)
+@Client.on_message(filters.private, group=10)
 async def chatbot_response(client: Client, message: Message):
+    global blocklist, message_counts, conversation_cache
     user_id = message.from_user.id
     chat_id = message.chat.id
     user_input = None
     bot_id = client.me.id
-    global blocklist, message_counts
-    try:
-        user_id = message.from_user.id
-        chat_id = message.chat.id
-        current_time = datetime.now()
 
-        blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
-
-        if user_id in blocklist:
-            return
-
-        if user_id not in message_counts:
-            message_counts[user_id] = {"count": 1, "last_time": current_time}
-        else:
-            time_diff = (current_time - message_counts[user_id]["last_time"]).total_seconds()
-            if time_diff <= 3:
-                message_counts[user_id]["count"] += 1
-            else:
-                message_counts[user_id] = {"count": 1, "last_time": current_time}
-            
-            if message_counts[user_id]["count"] >= 6:
-                blocklist[user_id] = current_time + timedelta(minutes=1)
-                message_counts.pop(user_id, None)
-                await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
-                return
-    except:
-        pass
     try:
         chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
         if chat_status and chat_status.get("status") == "disabled":
@@ -339,8 +313,10 @@ async def chatbot_response(client: Client, message: Message):
                             conversation_cache[chat_id].pop(0)
 
                         return
-                except:
-                    pass
+                except requests.RequestException as e:
+                    print(f"Error with AI response: {e}")
+
+           
             reply_data = await get_reply(user_input)
             if reply_data:
                 response_text = reply_data["text"]
@@ -376,11 +352,11 @@ async def chatbot_response(client: Client, message: Message):
 
     except MessageEmpty:
         await message.reply_text("🙄🙄")
-    except:
-        return
-        
+    except Exception as e:
+        print(f"{e}")
 
-@Client.on_message(filters.incoming & filters.group, group=-11)
+
+@Client.on_message(filters.incoming & filters.group, group=11)
 async def chatbot_responsee(client: Client, message: Message):
     try:
         chat_id = message.chat.id
@@ -401,7 +377,7 @@ async def chatbot_responsee(client: Client, message: Message):
 
         if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
             reply_data = await get_reply(message.text)
-            
+
             if reply_data:
                 response_text = reply_data["text"]
                 chat_lang = await get_chat_language(chat_id, bot_id)
@@ -444,7 +420,7 @@ async def chatbot_responsee(client: Client, message: Message):
                         pass
                 else:
                     try:
-                        await message.reply_text(translated_text)
+                        asyncio.create_task(typing_effect(client, message, translated_text))
                     except:
                         pass
             else:
@@ -461,8 +437,10 @@ async def chatbot_responsee(client: Client, message: Message):
             await message.reply_text("🙄🙄")
         except:
             pass
-    except:
+    except Exception as e:
         return
+                        
+                       
 
 
 
@@ -470,7 +448,7 @@ conversation_cache = {}
 user_data_cache = {}
 
 
-@Client.on_message(filters.group, group=-12)
+@Client.on_message(filters.group, group=12)
 async def group_chat_response(client: Client, message: Message):
     global blocklist, message_counts, conversation_cache, user_data_cache
     try:
