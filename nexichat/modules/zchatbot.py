@@ -535,7 +535,7 @@ async def group_chat_response(client: Client, message: Message):
                     result = json_response.get("data", "").strip()
 
                     if "413" in str(result) or "The request could not be satisfied" in str(result):
-                    await clear_user_history(user_id)
+                        await clear_user_history(user_id)
                     return await message.reply_text(
                         "**Your chat history was too long, so I cleared it. Let's start fresh!**"
                     )
