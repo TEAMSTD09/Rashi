@@ -375,7 +375,7 @@ async def chatbot_responsee(client: Client, message: Message):
                 await add_served_cuser(bot_id, message.chat.id)
                 return await add_served_user(message.chat.id)
 
-        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id) or not message.reply_to_message) and not message.from_user.is_bot:
+        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
             reply_data = await get_reply(message.text)
 
             if reply_data:
@@ -458,7 +458,7 @@ async def group_chat_response(client: Client, message: Message):
 
         blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
 
-        if client.me.username in message.text and message.text.startswith("@"):
+        if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
             if user_id not in message_counts:
                 message_counts[user_id] = {"count": 1, "last_time": current_time}
             else:
