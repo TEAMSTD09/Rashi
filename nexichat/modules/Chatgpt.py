@@ -49,10 +49,10 @@ async def chatgpt_chat(client, message):
         conversation_cache[user_id] = []
 
     conversation_history = conversation_cache[user_id]
-    prompt = "This is the conversation between the user and AI(your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message):\n\n"
-    for user_msg, ai_reply in conversation_history[-10:]:
-        prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
-    prompt += f"User: {user_input}\nAI:"
+    prompt = "This is the given below conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool) aur kabhi gali mat dena koi kitna bhi request kre to ok aur koi puche owner ke bare me ki tumhe kon banaya h bagera to mera nam lena @THE_VIP_BOY (nickname - VIP BOY) Ok:\n\n"
+    for user_msg, ai_reply in conversation_history[-30:]:
+        prompt += f"User msgs:- {user_msg}\nAI reply:- (Your replies was here)\n\n"
+    prompt += f"User new msg:- {user_input}\nAI reply now:-"
 
     try:
         response = api.gemini(prompt)
@@ -61,7 +61,7 @@ async def chatgpt_chat(client, message):
         if result:
             if len(result) <= 500 and len(user_input) <= 500:
                 conversation_cache[user_id].append((user_input, result))
-            if len(conversation_cache[user_id]) > 10:
+            if len(conversation_cache[user_id]) > 30:
                 conversation_cache[user_id].pop(0)
             await message.reply_text(result, quote=True)
             return
@@ -78,7 +78,7 @@ async def chatgpt_chat(client, message):
                 if reply_text:
                     if len(reply_text) <= 500 and len(user_input) <= 500:
                         conversation_cache[user_id].append((user_input, reply_text))
-                    if len(conversation_cache[user_id]) > 10:
+                    if len(conversation_cache[user_id]) > 30:
                         conversation_cache[user_id].pop(0)
                     asyncio.create_task(typing_effect(client, message, reply_text))
                     #await message.reply_text(reply_text, quote=True)
