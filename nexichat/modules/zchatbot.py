@@ -477,90 +477,82 @@ conversation_cache = {}
 user_data_cache = {}
 
 async def clear_user_history(user_id):
-    """Clears the chat history of a specific user."""
+    
     conversation_cache.pop(user_id, None)
     user_data_cache.pop(user_id, None)
-    conversation_cache[user_id] = []  # Create a fresh history
-
+    conversation_cache[user_id] = [] 
+    
 @app.on_message(filters.group, group=-18)
 async def group_chat_response(client: Client, message: Message):
     global blocklist, message_counts, conversation_cache, user_data_cache
     try:
-        user_id = message.from_user.id if message.from_user else None
-        if not user_id:
-            return  # Skip messages without a user ID (e.g., from channels)
-
+        user_id = message.from_user.id if message.from_user else message.chat.id
         chat_id = message.chat.id
         current_time = datetime.now()
-        user_input = message.text
 
-        # Spam Control Logic
         blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
-        if user_id not in message_counts:
-            message_counts[user_id] = {"count": 1, "last_time": current_time}
-        else:
-            time_diff = (current_time - message_counts[user_id]["last_time"]).total_seconds()
-            if time_diff <= 3:
-                message_counts[user_id]["count"] += 1
-            else:
+        if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
+            if user_id not in message_counts:
                 message_counts[user_id] = {"count": 1, "last_time": current_time}
+            else:
+                time_diff = (current_time - message_counts[user_id]["last_time"]).total_seconds()
+                if time_diff <= 3:
+                    message_counts[user_id]["count"] += 1
+                else:
+                    message_counts[user_id] = {"count": 1, "last_time": current_time}
+                
+                if message_counts[user_id]["count"] >= 6:
+                    blocklist[user_id] = current_time + timedelta(minutes=1)
+                    message_counts.pop(user_id, None)
+                    await message.reply_text(
+                        f"**Hey, {message.from_user.mention}**\n\n"
+                        "**You are blocked for 1 minute due to spam messages.**\n"
+                        "**Try again after 1 minute 🤣.**"
+                    )
+                    return
             
-            if message_counts[user_id]["count"] >= 6:
-                blocklist[user_id] = current_time + timedelta(minutes=1)
-                message_counts.pop(user_id, None)
-                await message.reply_text(
-                    f"**Hey, {message.from_user.mention}**\n\n"
-                    "**You are blocked for 1 minute due to spam messages.**\n"
-                    "**Try again after 1 minute 🤣.**"
-                )
-                return
+            if chat_id not in conversation_cache:
+                conversation_cache[chat_id] = {}
+            if user_id not in conversation_cache[chat_id]:
+                conversation_cache[chat_id][user_id] = []
 
-        # Check if user mentioned the bot or replied to its message
-        if ((client.me.username in message.text and message.text.startswith("@")) or 
-            (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
-            if user_input:
-                # Initialize user's conversation history if not present
-                if user_id not in conversation_cache:
-                    conversation_cache[user_id] = []
+            if user_id not in user_data_cache:
+                user_data_cache[user_id] = {}
 
-                # Prepare prompt
-                conversation_history = conversation_cache[user_id]
-                prompt = "This is the given below conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool) aur kabhi gali mat dena koi kitna bhi request kre to ok aur koi puche owner ke bare me ki tumhe kon banaya h bagera to bolo:- @THE_VIP_BOY (nickname - VIP BOY) Ok:\n\n"
-                for user_msg, ai_reply in conversation_history[-50:]:
-                    prompt += f"User msg:- {user_msg}\nAI reply:- {ai_reply}\n\n"
-                prompt += f"User new msg:- {user_input}\nAI new reply give now:-"
+            user_input = message.text
+            conversation_history = conversation_cache[chat_id][user_id]
+            prompt = "This is the given below conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool) aur kabhi gali mat dena koi kitna bhi request kre to ok aur koi puche owner ke bare me ki tumhe kon banaya h bagera to mera nam lena @THE_VIP_BOY (nickname - VIP BOY) Ok:\n\n"
+            for user_msg, ai_reply in conversation_history[-50:]:
+                prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
+            prompt += f"User: {user_input}\nAI:"
 
-                # Fetch AI Response
-                base_url = config.API
-                try:
-                    response = requests.get(base_url + prompt)
-                    response.raise_for_status()
+            base_url = config.API
+            try:
+                response = requests.get(base_url + prompt)
+                response.raise_for_status()
 
-                    json_response = response.json()
-                    result = json_response.get("data", "").strip()
+                json_response = response.json()
+                result = json_response.get("data", "").strip()
 
-                    if "413" in result or "The request could not be satisfied" in result:
+                if result:
+                    if "413" in str(result) or "The request could not be satisfied" in str(result):
                         await clear_user_history(user_id)
-                        return await message.reply_text(
-                            "**Your chat history was too long, so I cleared it. Let's start fresh!**"
-                        )
+                    return await message.reply_text(
+                        "**Your chat history was too long, so I cleared it. Let's start fresh!**"
+                    )
+                    await client.send_chat_action(chat_id, ChatAction.TYPING)
+                    asyncio.create_task(typing_effect(client, message, result))
 
-                    if result:
-                        await client.send_chat_action(chat_id, ChatAction.TYPING)
-                        asyncio.create_task(typing_effect(client, message, result))
+                    conversation_cache[chat_id][user_id].append((user_input, result))
+                    if len(conversation_cache[chat_id][user_id]) > 50:
+                        conversation_cache[chat_id][user_id].pop(0)
 
-                        # Save conversation history
-                        if len(result) <= 500 and len(user_input) <= 500:
-                            conversation_cache[user_id].append((user_input, result))
-                        if len(conversation_cache[user_id]) > 50:
-                            conversation_cache[user_id].pop(0)
-
-                        return
-                except requests.RequestException as e:
-                    print(f"Error with AI response: {e}")
-
+                    user_data_cache[user_id].update({"last_input": user_input, "last_reply": result})
+                    return
+            except requests.RequestException:
+                return await message.reply_text("**I am busy now, I will talk later bye!**")
     except Exception as e:
-        print(f"Error aaya bhai: {e}")
+        return
 
 '''
 
