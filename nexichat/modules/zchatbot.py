@@ -552,4 +552,6 @@ async def group_chat_response(client: Client, message: Message):
                         return
                 except requests.RequestException as e:
                     print(f"Error with AI response: {e}")
-            
+
+    except Exception as e:
+        print(f"Error aaya bhai :- {e}")
