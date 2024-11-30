@@ -35,6 +35,29 @@ translator = GoogleTranslator()
 lang_db = db.ChatLangDb.LangCollection
 status_db = db.chatbot_status_db.status
 
+import os
+
+import shutil
+
+@nexichat.on_message(filters.command("clean"))
+
+async def clean(_, message):
+
+    A = await message.reply_text("ᴄʟᴇᴀɴɪɴɢ ᴛᴇᴍᴘ ᴅɪʀᴇᴄᴛᴏʀɪᴇs...")
+
+    dir = "downloads"
+
+    dir1 = "cache"
+
+    shutil.rmtree(dir)
+
+    shutil.rmtree(dir1)
+
+    os.mkdir(dir)
+
+    os.mkdir(dir1)
+
+    await A.edit("ᴛᴇᴍᴘ ᴅɪʀᴇᴄᴛᴏʀɪᴇs ᴀʀᴇ ᴄʟᴇᴀɴᴇᴅ")
 
 @nexichat.on_message(
     filters.command(["restart"]) & SUDOERS
