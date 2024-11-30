@@ -46,12 +46,12 @@ async def clean(_, message):
     A = await message.reply_text("ᴄʟᴇᴀɴɪɴɢ ᴛᴇᴍᴘ ᴅɪʀᴇᴄᴛᴏʀɪᴇs...")
     try:
         dir = "downloads"
-    except:
+    except Exception as e:
         pass
 
     try:
         dir1 = "cache"
-    except:
+    except Exception as e:
         pass
     shutil.rmtree(dir)
 
