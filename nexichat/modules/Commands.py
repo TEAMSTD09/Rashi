@@ -44,11 +44,15 @@ import shutil
 async def clean(_, message):
 
     A = await message.reply_text("ᴄʟᴇᴀɴɪɴɢ ᴛᴇᴍᴘ ᴅɪʀᴇᴄᴛᴏʀɪᴇs...")
+    try:
+        dir = "downloads"
+    except:
+        pass
 
-    dir = "downloads"
-
-    dir1 = "cache"
-
+    try:
+        dir1 = "cache"
+    except:
+        pass
     shutil.rmtree(dir)
 
     shutil.rmtree(dir1)
