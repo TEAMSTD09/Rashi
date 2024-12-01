@@ -27,7 +27,7 @@ async def VIPbin(text):
     link = BASE + resp["message"]
     return link
 
-@app.on_message(filters.command("mongochk") & SUDOERS)
+@app.on_message(filters.command("mongochk"))
 async def mongo_check_command(client, message: Message):
     if len(message.command) < 2:
         await message.reply("Please provide your MongoDB URL with the command: `/mongochk your_mongo_url`")
