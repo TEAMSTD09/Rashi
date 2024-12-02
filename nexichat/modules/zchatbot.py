@@ -307,7 +307,7 @@ async def chatbot_response(client: Client, message: Message):
 
                 conversation_history = conversation_cache[chat_id]
                 prompt = (
-        "Hey ChatGPT, tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
+        "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
         "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
         "Conditions:-\n"
         "- Purane chats padho aur Har reply pichle message ke context ko follow karte hue, bina kisi naye topic par switch kiye new reply hona chahiye.\n"
@@ -532,7 +532,7 @@ async def group_chat_response(client: Client, message: Message):
             user_input = message.text
             conversation_history = conversation_cache[chat_id][user_id]
             prompt = (
-        "Hey ChatGPT, tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
+        "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
         "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
         "Conditions:-\n"
         "- Purane chats padho aur Har reply pichle message ke context ko follow karte hue, bina kisi naye topic par switch kiye new reply hona chahiye.\n"
