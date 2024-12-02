@@ -332,9 +332,9 @@ async def chatbot_response(client: Client, message: Message):
                 - Agar tumhare owner ke baare me poocha jaye, to reply karo: @THE_VIP_BOY.
                 """
             
-                for user_msg, ai_reply in conversation_history[-30:]:
-                    prompt += f"User msgs:- {user_msg}\nAI reply:- (Your replies was here)\n\n"
-                prompt += f"User new msg:- {user_input}\nAI reply now:-"
+                for user_msg, ai_reply in conversation_history[-15:]:
+                    prompt += f"**User msgs:-** {user_msg}\n**Your reply was:-** `{result}`\n\n"
+                prompt += f"**User new/latest msg:-** {user_input}"
 
                 base_url = config.API
                 try:
@@ -570,9 +570,9 @@ async def group_chat_response(client: Client, message: Message):
             - Agar tumhare owner ke baare me poocha jaye, to reply karo: @THE_VIP_BOY.
             """
             
-            for user_msg, ai_reply in conversation_history[-30:]:
-                prompt += f"User msgs:- {user_msg}\nAI reply:- (Your replies was here)\n\n"
-            prompt += f"User new msg:- {user_input}\nAI reply now:-"
+            for user_msg, ai_reply in conversation_history[-15:]:
+                prompt += f"**User msgs:-** {user_msg}\n**Your reply was:-** `{result}`\n\n"
+            prompt += f"**User new/latest msg:-** {user_input}"
 
             base_url = config.API
             try:
@@ -586,9 +586,9 @@ async def group_chat_response(client: Client, message: Message):
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
                     asyncio.create_task(typing_effect(client, message, result))
 
-                    if len(result) <= 500 and len(user_input) <= 500:
+                    if len(result) <= 300 and len(user_input) <= 300:
                         conversation_cache[chat_id][user_id].append((user_input, result))
-                    if len(conversation_cache[chat_id][user_id]) > 30:
+                    if len(conversation_cache[chat_id][user_id]) > 15:
                         conversation_cache[chat_id][user_id].pop(0)
 
                     user_data_cache[user_id].update({"last_input": user_input, "last_reply": result})
