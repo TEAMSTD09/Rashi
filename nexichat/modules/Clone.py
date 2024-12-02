@@ -164,31 +164,18 @@ async def delete_cloned_bot(client, message):
         await message.reply_text(f"**An error occurred while deleting the cloned bot:** {e}")
         logging.exception(e)
 
-import os
-
 async def restart_bots():
     global CLONES
     try:
         logging.info("Restarting all cloned bots...")
         bots = [bot async for bot in clonebotdb.find()]
-        semaphore = asyncio.Semaphore(10)
+        
+        semaphore = asyncio.Semaphore(10) 
 
         async def restart_bot(bot):
-            async with semaphore:
+            async with semaphore: 
                 bot_token = bot["token"]
-                session_file = f"{bot_token}.session"
-                if os.path.exists(session_file):
-                    os.remove(session_file)
-                    logging.info(f"Deleted corrupted session file: {session_file}")
-
-                ai = Client(
-                    bot_token,
-                    API_ID,
-                    API_HASH,
-                    bot_token=bot_token,
-                    plugins=dict(root="nexichat/mplugin"),
-                    workdir=f"./sessions/{bot_token}"
-                )
+                ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root="nexichat/mplugin"))
                 try:
                     await ai.start()
                     bot_info = await ai.get_me()
@@ -209,15 +196,18 @@ async def restart_bots():
                         BotCommand("ask", "Ask anything from chatgpt"),
                         BotCommand("repo", "Get chatbot source code"),
                     ])
+
                     if bot_info.id not in CLONES:
                         CLONES.add(bot_info.id)
+                        
                 except (AccessTokenExpired, AccessTokenInvalid):
                     await clonebotdb.delete_one({"token": bot_token})
                     logging.info(f"Removed expired or invalid token for bot ID: {bot['bot_id']}")
                 except Exception as e:
                     logging.exception(f"Error while restarting bot with token {bot_token}: {e}")
-
+        
         await asyncio.gather(*(restart_bot(bot) for bot in bots))
+        
     except Exception as e:
         logging.exception("Error while restarting bots.")
 
