@@ -306,21 +306,21 @@ async def chatbot_response(client: Client, message: Message):
 
                 conversation_history = conversation_cache[chat_id]
                 prompt = (
-    "Hey ChatGPT, tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
-    "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
-    "Conditions:-\n"
-    "- Purane chats padho aur Har reply pichle message ke context ko follow karte hue, bina kisi naye topic par switch kiye new reply hona chahiye.\n"
-    "- Bas latest message ka relevant aur point-to-point jawab do aur pichle topic ya replied msg ke anusar new reply hona chahiye.\n"
-    "- Reply ekdam short rakho jitna chhota ho sake, jab tak detail explain karna zaroori na ho.\n"
-    "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
-    "- New Message jis language me aaya ho, ekdam usi lang me reply hona chahiye aur reply jaisa emoji bhi.\n"
-    "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare.\n"
-    "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY."
-            )
+                    "Hey ChatGPT, tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
+                    "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
+                    "Conditions:-\n"
+                    "- Purane chats padho aur Har reply pichle message ke context ko follow karte hue, bina kisi naye topic par switch kiye new reply hona chahiye.\n"
+                    "- Bas latest message ka relevant aur point-to-point jawab do aur pichle topic ya replied msg ke anusar new reply hona chahiye.\n"
+                    "- Reply ekdam short rakho jitna chhota ho sake, jab tak detail explain karna zaroori na ho.\n"
+                    "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
+                    "- New Message jis language me aaya ho, ekdam usi lang me reply hona chahiye aur reply jaisa emoji bhi.\n"
+                    "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare.\n"
+                    "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY."
+                )
 
             
                 for user_msg, ai_reply in conversation_history[-15:]:
-                    prompt += f"**User msgs:-** {user_msg}\n**Your reply was:-** `{result}`\n\n"
+                    prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{result}`\n\n"
                 prompt += f"**User new/latest msg:-** {user_input}"
 
                 base_url = config.API
@@ -335,9 +335,9 @@ async def chatbot_response(client: Client, message: Message):
                         await client.send_chat_action(message.chat.id, ChatAction.TYPING)
                         asyncio.create_task(typing_effect(client, message, result))
                         
-                        if len(result) <= 500 and len(user_input) <= 500:
+                        if len(result) <= 300 and len(user_input) <= 300:
                             conversation_cache[chat_id].append((user_input, result))
-                        if len(conversation_cache[chat_id]) > 30:
+                        if len(conversation_cache[chat_id]) > 15:
                             conversation_cache[chat_id].pop(0)
                         
                         return
@@ -541,7 +541,7 @@ async def group_chat_response(client: Client, message: Message):
             )
 
             for user_msg, ai_reply in conversation_history[-15:]:
-                prompt += f"**User msgs:-** {user_msg}\n**Your reply was:-** {ai_reply}\n\n"
+                prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
 
             prompt += f"**User new/latest msg:-** {user_input}"
 
