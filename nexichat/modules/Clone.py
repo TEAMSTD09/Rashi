@@ -170,44 +170,46 @@ async def restart_bots():
         logging.info("Restarting all cloned bots...")
         bots = [bot async for bot in clonebotdb.find()]
         
-        async def restart_bot(bot):
-            bot_token = bot["token"]
-            ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root="nexichat/mplugin"))
-            try:
-                await ai.start()
-                bot_info = await ai.get_me()
-                await ai.set_bot_commands([
-                    BotCommand("start", "Start the bot"),
-                    BotCommand("help", "Get the help menu"),
-                    BotCommand("clone", "Make your own chatbot"),
-                    BotCommand("ping", "Check if the bot is alive or dead"),
-                    BotCommand("lang", "Select bot reply language"),
-                    BotCommand("chatlang", "Get current using lang for chat"),
-                    BotCommand("resetlang", "Reset to default bot reply lang"),
-                    BotCommand("id", "Get users user_id"),
-                    BotCommand("stats", "Check bot stats"),
-                    BotCommand("gcast", "Broadcast any message to groups/users"),
-                    BotCommand("chatbot", "Enable or disable chatbot"),
-                    BotCommand("status", "Check chatbot enable or disable in chat"),
-                    BotCommand("shayri", "Get random shayri for love"),
-                    BotCommand("ask", "Ask anything from chatgpt"),
-                    BotCommand("repo", "Get chatbot source code"),
-                ])
+        semaphore = asyncio.Semaphore(10) 
 
-                if bot_info.id not in CLONES:
-                    CLONES.add(bot_info.id)
-                    
-            except (AccessTokenExpired, AccessTokenInvalid):
-                await clonebotdb.delete_one({"token": bot_token})
-                logging.info(f"Removed expired or invalid token for bot ID: {bot['bot_id']}")
-            except Exception as e:
-                logging.exception(f"Error while restarting bot with token {bot_token}: {e}")
-            
+        async def restart_bot(bot):
+            async with semaphore: 
+                bot_token = bot["token"]
+                ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root="nexichat/mplugin"))
+                try:
+                    await ai.start()
+                    bot_info = await ai.get_me()
+                    await ai.set_bot_commands([
+                        BotCommand("start", "Start the bot"),
+                        BotCommand("help", "Get the help menu"),
+                        BotCommand("clone", "Make your own chatbot"),
+                        BotCommand("ping", "Check if the bot is alive or dead"),
+                        BotCommand("lang", "Select bot reply language"),
+                        BotCommand("chatlang", "Get current using lang for chat"),
+                        BotCommand("resetlang", "Reset to default bot reply lang"),
+                        BotCommand("id", "Get users user_id"),
+                        BotCommand("stats", "Check bot stats"),
+                        BotCommand("gcast", "Broadcast any message to groups/users"),
+                        BotCommand("chatbot", "Enable or disable chatbot"),
+                        BotCommand("status", "Check chatbot enable or disable in chat"),
+                        BotCommand("shayri", "Get random shayri for love"),
+                        BotCommand("ask", "Ask anything from chatgpt"),
+                        BotCommand("repo", "Get chatbot source code"),
+                    ])
+
+                    if bot_info.id not in CLONES:
+                        CLONES.add(bot_info.id)
+                        
+                except (AccessTokenExpired, AccessTokenInvalid):
+                    await clonebotdb.delete_one({"token": bot_token})
+                    logging.info(f"Removed expired or invalid token for bot ID: {bot['bot_id']}")
+                except Exception as e:
+                    logging.exception(f"Error while restarting bot with token {bot_token}: {e}")
+        
         await asyncio.gather(*(restart_bot(bot) for bot in bots))
         
     except Exception as e:
         logging.exception("Error while restarting bots.")
-
 
 @app.on_message(filters.command("delallclone") & filters.user(int(OWNER_ID)))
 async def delete_all_cloned_bots(client, message):
