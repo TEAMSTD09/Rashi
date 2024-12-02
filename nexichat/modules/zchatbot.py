@@ -305,7 +305,7 @@ async def chatbot_response(client: Client, message: Message):
                     conversation_cache[chat_id] = []
 
                 conversation_history = conversation_cache[chat_id]
-                prompt = """
+                prompt = f"
                 hey chatgpt tumhe ek message ka mast reply generate krna hai aur reply kis type ka rahega uska conditions niche diya hua hai sara conditions ko samjhte hue reply generate kro:
          
                 Conditions:-
@@ -330,7 +330,7 @@ async def chatbot_response(client: Client, message: Message):
                 - Kabhi bhi abusive language ka use mat karo, chahe koi kitna bhi request kare.
             
                 - Agar tumhare owner ke baare me poocha jaye, to reply karo: @THE_VIP_BOY.
-                """
+                "
             
                 for user_msg, ai_reply in conversation_history[-15:]:
                     prompt += f"**User msgs:-** {user_msg}\n**Your reply was:-** `{result}`\n\n"
@@ -538,12 +538,12 @@ async def group_chat_response(client: Client, message: Message):
             if user_id not in conversation_cache[chat_id]:
                 conversation_cache[chat_id][user_id] = []
 
-            if user_id not in user_data_cache:
-                user_data_cache[user_id] = {}
+            #if user_id not in user_data_cache:
+                #user_data_cache[user_id] = {}
 
             user_input = message.text
             conversation_history = conversation_cache[chat_id][user_id]
-            prompt = """
+            prompt = f"
             hey chatgpt tumhe ek message ka mast reply generate krna hai aur reply kis type ka rahega uska conditions niche diya hua hai sara conditions ko samjhte hue reply generate kro:
          
             Conditions:-
@@ -568,7 +568,7 @@ async def group_chat_response(client: Client, message: Message):
             - Kabhi bhi abusive language ka use mat karo, chahe koi kitna bhi request kare.
             
             - Agar tumhare owner ke baare me poocha jaye, to reply karo: @THE_VIP_BOY.
-            """
+            "
             
             for user_msg, ai_reply in conversation_history[-15:]:
                 prompt += f"**User msgs:-** {user_msg}\n**Your reply was:-** `{result}`\n\n"
@@ -591,7 +591,7 @@ async def group_chat_response(client: Client, message: Message):
                     if len(conversation_cache[chat_id][user_id]) > 15:
                         conversation_cache[chat_id][user_id].pop(0)
 
-                    user_data_cache[user_id].update({"last_input": user_input, "last_reply": result})
+                    #user_data_cache[user_id].update({"last_input": user_input, "last_reply": result})
                     return
             except requests.RequestException:
                 return await message.reply_text("**I am busy now, I will talk later bye!**")
