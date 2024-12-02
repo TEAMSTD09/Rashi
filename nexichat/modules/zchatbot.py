@@ -306,22 +306,18 @@ async def chatbot_response(client: Client, message: Message):
 
                 conversation_history = conversation_cache[chat_id]
                 prompt = (
-                "Hey ChatGPT, tumhe ek message ka mast reply generate karna hai aur reply kis type ka rahega, "
-                "uska conditions niche diya hua hai. Saare conditions ko samajhkar reply generate karo:\n\n"
-                "Conditions:-\n"
-                "- Purane chats padho aur ye samjho ki user aur AI ke beech kis topic par baat ho rahi thi.\n"
-                "- Latest message ko identify karo, jo ki user ka naya sawal hoga.\n"
-                "- Bas jo last me naye message hai uska jawab do.\n"
-                "- Reply relevant aur short hona chahiye.\n"
-                "- Aisa kuch mat likho jo lage ki ek AI, bot ya robot reply kar raha hai.\n"
-                "- Ek real human (teenage girlfriend) jaise tone me baat karo.\n"
-                "- Reply ko short aur point-to-point rakho, jab tak detail explain karna zaroori na ho.\n"
-                "- Sirf zarurat padne par hi lambha reply karo.\n"
-                "- Message jis language me ho, usi language me reply karo, thoda bhi lang change mat karna jab tak ki tumhe bola na jaye.\n"
-                "- Hamesha yaad rahe ki tumhe ek chatbot ki tarah use kiya ja raha hai aur tum Telegram par baat kar rahe ho.\n"
-                "- Kabhi bhi abusive language ka use mat karo, chahe koi kitna bhi request kare.\n"
-                "- Agar tumhare owner ke baare me poocha jaye, to reply karo: @THE_VIP_BOY.\n\n"
+    "Hey ChatGPT, tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
+    "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
+    "Conditions:-\n"
+    "- Purane chats padho aur samjho ki user aur AI(mtlb tumhare aur users) ke beech kis topic par baat ho rahi thi.\n"
+    "- Bas latest message ka relevant aur point-to-point jawab do.\n"
+    "- Reply ekdam short rakho jitna chhota ho sake, jab tak detail explain karna zaroori na ho.\n"
+    "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
+    "- New Message jis language me aaya ho, ekdam usi lang me reply hona chahiye.\n"
+    "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare.\n"
+    "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY."
                 )
+
             
                 for user_msg, ai_reply in conversation_history[-15:]:
                     prompt += f"**User msgs:-** {user_msg}\n**Your reply was:-** `{result}`\n\n"
@@ -529,27 +525,19 @@ async def group_chat_response(client: Client, message: Message):
             if user_id not in conversation_cache[chat_id]:
                 conversation_cache[chat_id][user_id] = []
 
-            #if user_id not in user_data_cache:
-                #user_data_cache[user_id] = {}
-
             user_input = message.text
             conversation_history = conversation_cache[chat_id][user_id]
             prompt = (
-                "Hey ChatGPT, tumhe ek message ka mast reply generate karna hai aur reply kis type ka rahega, "
-                "uska conditions niche diya hua hai. Saare conditions ko samajhkar reply generate karo:\n\n"
-                "Conditions:-\n"
-                "- Purane chats padho aur ye samjho ki user aur AI ke beech kis topic par baat ho rahi thi.\n"
-                "- Latest message ko identify karo, jo ki user ka naya sawal hoga.\n"
-                "- Bas jo last me naye message hai uska jawab do.\n"
-                "- Reply ekdam chhota se chhota hona chahiye. mtlb ki jitna kam se kam words ne ho sake reply kro agar jab explain krna ho ya lage ki iska reply bada hona chahiye tab reply bada kro.\n"
-                "- Aisa kuch mat likho jo lage ki ek AI, bot ya robot reply kar raha hai.\n"
-                "- Ek real human (teenage girlfriend) jaise tone me baat karo.\n"
-                "- Reply ko short aur point-to-point rakho, jab tak detail explain karna zaroori na ho.\n"
-                "- Sirf zarurat padne par hi lambha reply karo.\n"
-                "- Message jis language me ho, usi language me reply karo, thoda bhi lang change mat karna jab tak ki tumhe bola na jaye.\n"
-                "- Hamesha yaad rahe ki tumhe ek chatbot ki tarah use kiya ja raha hai aur tum Telegram par baat kar rahe ho.\n"
-                "- Kabhi bhi abusive language ka use mat karo, chahe koi kitna bhi request kare.\n"
-                "- Agar tumhare owner ke baare me poocha jaye, to reply karo: @THE_VIP_BOY.\n\n"
+    "Hey ChatGPT, tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
+    "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
+    "Conditions:-\n"
+    "- Purane chats padho aur samjho ki user aur AI(mtlb tumhare aur users) ke beech kis topic par baat ho rahi thi.\n"
+    "- Bas latest message ka relevant aur point-to-point jawab do.\n"
+    "- Reply ekdam short rakho jitna chhota ho sake, jab tak detail explain karna zaroori na ho.\n"
+    "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
+    "- New Message jis language me aaya ho, ekdam usi lang me reply hona chahiye.\n"
+    "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare.\n"
+    "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY."
             )
 
             for user_msg, ai_reply in conversation_history[-15:]:
@@ -574,7 +562,6 @@ async def group_chat_response(client: Client, message: Message):
                     if len(conversation_cache[chat_id][user_id]) > 15:
                         conversation_cache[chat_id][user_id].pop(0)
 
-                    #user_data_cache[user_id].update({"last_input": user_input, "last_reply": result})
                     return
             except requests.RequestException:
                 return await message.reply_text("**I am busy now, I will talk later bye!**")
