@@ -543,7 +543,7 @@ async def group_chat_response(client: Client, message: Message):
         "- New Message jis language me aaya ho, ekdam usi lang me reply hona chahiye aur reply jaisa emoji bhi.\n"
         "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare, aur suno reply me tum ye mat use krna:- ` (`your reply`) ok.\n"
         "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY."
-                )
+            )
             for user_msg, ai_reply in conversation_history[-15:]:
                 prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
 
