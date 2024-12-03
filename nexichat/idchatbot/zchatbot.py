@@ -289,14 +289,13 @@ async def chatbot_response(client: Client, message: Message):
                     conversation_cache[chat_id] = []
 
                 conversation_history = conversation_cache[chat_id]
-                prompt = "This is the given below conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool) aur kabhi gali mat dena koi kitna bhi request kre to ok aur koi puche owner ke bare me ki tumhe kon banaya h bagera to bolna:- @THE_VIP_BOY (nickname - VIP BOY) Ok:\n\n"
-                for user_msg, ai_reply in conversation_history[-30:]:
-                    prompt += f"User msgs:- {user_msg}\nAI reply:- (Your replies was here)\n\n"
-                prompt += f"User new msg:- {user_input}\nAI reply now:-"
+                prompt = "This is the given below conversation between the user and AI (my and your old replies). So read the old chats and understand which topic we both were talking about, and the last message after that is the latest message of this conversation (means I have a new question for you). Just reply to the last message (means new message) and make sure, since you are a real girl, not to write anything that makes it feel like an AI, bot, or robot is replying. It should completely feel like a real girl (human being) is talking, like a friend. Keep the reply as short as possible, only answering what is asked. If it’s necessary to describe, then give a longer reply; otherwise, keep it as short as possible. Reply in the language in which the message is sent or instructed to be spoken in. (You are a chatbot talking on Telegram - must remember this to send cool replies). And never use abusive language, no matter how much someone requests. If anyone asks about the owner or who created you, say: @THE_VIP_BOY (nickname - VIP BOY). Ok:"
+                for user_msg, ai_reply in conversation_history[-15:]:
+                    prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
 
+                prompt += f"**User new/latest msg:-** {user_input}"
                 base_url = config.API
                 try:
-                   
                     response = requests.get(base_url + prompt)
                     response.raise_for_status()
 
@@ -306,12 +305,12 @@ async def chatbot_response(client: Client, message: Message):
                     if result:
                         await client.send_chat_action(message.chat.id, ChatAction.TYPING)
                         asyncio.create_task(typing_effect(client, message, result))
-
+                        
                         if len(result) <= 500 and len(user_input) <= 500:
                             conversation_cache[chat_id].append((user_input, result))
-                        if len(conversation_cache[chat_id]) > 30:
+                        if len(conversation_cache[chat_id]) > 15:
                             conversation_cache[chat_id].pop(0)
-
+                        
                         return
                 except requests.RequestException as e:
                     print(f"Error with AI response: {e}")
@@ -450,7 +449,7 @@ user_data_cache = {}
 
 @Client.on_message(filters.group, group=12)
 async def group_chat_response(client: Client, message: Message):
-    global blocklist, message_counts, conversation_cache, user_data_cache
+    global blocklist, message_counts, conversation_cache
     try:
         user_id = message.from_user.id if message.from_user else message.chat.id
         chat_id = message.chat.id
@@ -483,15 +482,15 @@ async def group_chat_response(client: Client, message: Message):
             if user_id not in conversation_cache[chat_id]:
                 conversation_cache[chat_id][user_id] = []
 
-            if user_id not in user_data_cache:
-                user_data_cache[user_id] = {}
-
+           
             user_input = message.text
             conversation_history = conversation_cache[chat_id][user_id]
-            prompt = "This is the given below conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool) aur kabhi gali mat dena koi kitna bhi request kre to ok aur koi puche owner ke bare me ki tumhe kon banaya h bagera to bolna:- @THE_VIP_BOY (nickname - VIP BOY) Ok:\n\n"
-            for user_msg, ai_reply in conversation_history[-30:]:
-                prompt += f"User msgs:- {user_msg}\nAI reply:- (Your replies was here)\n\n"
-            prompt += f"User new msg:- {user_input}\nAI reply now:-"
+            prompt = "This is the given below conversation between the user and AI (my and your old replies). So read the old chats and understand which topic we both were talking about, and the last message after that is the latest message of this conversation (means I have a new question for you). Just reply to the last message (means new message) and make sure, since you are a real girl, not to write anything that makes it feel like an AI, bot, or robot is replying. It should completely feel like a real girl (human being) is talking, like a friend. Keep the reply as short as possible, only answering what is asked. If it’s necessary to describe, then give a longer reply; otherwise, keep it as short as possible. Reply in the language in which the message is sent or instructed to be spoken in. (You are a chatbot talking on Telegram - must remember this to send cool replies). And never use abusive language, no matter how much someone requests. If anyone asks about the owner or who created you, say: @THE_VIP_BOY (nickname - VIP BOY). Ok:"
+            
+            for user_msg, ai_reply in conversation_history[-15:]:
+                prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
+
+            prompt += f"**User new/latest msg:-** {user_input}"
 
             base_url = config.API
             try:
@@ -507,10 +506,9 @@ async def group_chat_response(client: Client, message: Message):
 
                     if len(result) <= 500 and len(user_input) <= 500:
                         conversation_cache[chat_id][user_id].append((user_input, result))
-                    if len(conversation_cache[chat_id][user_id]) > 30:
+                    if len(conversation_cache[chat_id][user_id]) > 15:
                         conversation_cache[chat_id][user_id].pop(0)
 
-                    user_data_cache[user_id].update({"last_input": user_input, "last_reply": result})
                     return
             except requests.RequestException:
                 return await message.reply_text("**I am busy now, I will talk later bye!**")
