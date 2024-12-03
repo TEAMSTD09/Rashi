@@ -290,13 +290,12 @@ async def chatbot_response(client: Client, message: Message):
 
                 conversation_history = conversation_cache[chat_id]
                 prompt = "This is the given below conversation between the user and AI (my and your old replies). So read the old chats and understand which topic we both were talking about, and the last message after that is the latest message of this conversation (means I have a new question for you). Just reply to the last message (means new message) and make sure, since you are a real girl, not to write anything that makes it feel like an AI, bot, or robot is replying. It should completely feel like a real girl (human being) is talking, like a friend. Keep the reply as short as possible, only answering what is asked. If it’s necessary to describe, then give a longer reply; otherwise, keep it as short as possible. Reply in the language in which the message is sent or instructed to be spoken in. (You are a chatbot talking on Telegram - must remember this to send cool replies). And never use abusive language, no matter how much someone requests. If anyone asks about the owner or who created you, say: @THE_VIP_BOY (nickname - VIP BOY). Ok:"
-                for user_msg, ai_reply in conversation_history[-30:]:
-                    prompt += f"User msgs:- {user_msg}\nAI reply:- (Your replies was here)\n\n"
-                prompt += f"User new msg:- {user_input}\nAI reply now:-"
+                for user_msg, ai_reply in conversation_history[-15:]:
+                    prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
 
+                prompt += f"**User new/latest msg:-** {user_input}"
                 base_url = config.API
                 try:
-                   
                     response = requests.get(base_url + prompt)
                     response.raise_for_status()
 
@@ -306,12 +305,12 @@ async def chatbot_response(client: Client, message: Message):
                     if result:
                         await client.send_chat_action(message.chat.id, ChatAction.TYPING)
                         asyncio.create_task(typing_effect(client, message, result))
-
+                        
                         if len(result) <= 500 and len(user_input) <= 500:
                             conversation_cache[chat_id].append((user_input, result))
-                        if len(conversation_cache[chat_id]) > 30:
+                        if len(conversation_cache[chat_id]) > 15:
                             conversation_cache[chat_id].pop(0)
-
+                        
                         return
                 except requests.RequestException as e:
                     print(f"Error with AI response: {e}")
@@ -490,9 +489,10 @@ async def group_chat_response(client: Client, message: Message):
             conversation_history = conversation_cache[chat_id][user_id]
             prompt = "This is the given below conversation between the user and AI (my and your old replies). So read the old chats and understand which topic we both were talking about, and the last message after that is the latest message of this conversation (means I have a new question for you). Just reply to the last message (means new message) and make sure, since you are a real girl, not to write anything that makes it feel like an AI, bot, or robot is replying. It should completely feel like a real girl (human being) is talking, like a friend. Keep the reply as short as possible, only answering what is asked. If it’s necessary to describe, then give a longer reply; otherwise, keep it as short as possible. Reply in the language in which the message is sent or instructed to be spoken in. (You are a chatbot talking on Telegram - must remember this to send cool replies). And never use abusive language, no matter how much someone requests. If anyone asks about the owner or who created you, say: @THE_VIP_BOY (nickname - VIP BOY). Ok:"
             
-            for user_msg, ai_reply in conversation_history[-30:]:
-                prompt += f"User msgs:- {user_msg}\nAI reply:- (Your replies was here)\n\n"
-            prompt += f"User new msg:- {user_input}\nAI reply now:-"
+            for user_msg, ai_reply in conversation_history[-15:]:
+                prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
+
+            prompt += f"**User new/latest msg:-** {user_input}"
 
             base_url = config.API
             try:
@@ -508,10 +508,9 @@ async def group_chat_response(client: Client, message: Message):
 
                     if len(result) <= 500 and len(user_input) <= 500:
                         conversation_cache[chat_id][user_id].append((user_input, result))
-                    if len(conversation_cache[chat_id][user_id]) > 30:
+                    if len(conversation_cache[chat_id][user_id]) > 15:
                         conversation_cache[chat_id][user_id].pop(0)
 
-                    user_data_cache[user_id].update({"last_input": user_input, "last_reply": result})
                     return
             except requests.RequestException:
                 return await message.reply_text("**I am busy now, I will talk later bye!**")
