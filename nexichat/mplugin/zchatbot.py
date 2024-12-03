@@ -482,8 +482,7 @@ async def group_chat_response(client: Client, message: Message):
             if user_id not in conversation_cache[chat_id]:
                 conversation_cache[chat_id][user_id] = []
 
-            if user_id not in user_data_cache:
-                user_data_cache[user_id] = {}
+            
 
             user_input = message.text
             conversation_history = conversation_cache[chat_id][user_id]
