@@ -27,6 +27,8 @@ class Userbot(Client):
                 await self.one.join_chat("THE_VIP_BOY")
                 await self.one.join_chat("THE_VIP_BOY_OP")
                 await self.one.join_chat("TG_FRIENDSS")
+                await self.one.join_chat("AsuraaSupports")
+                await self.one.join_chat("C0DE_SEARCH")
                 await self.one.join_chat("VIP_CREATORS")
 
             except:
