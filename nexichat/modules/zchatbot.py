@@ -339,7 +339,7 @@ async def chatbot_response(client: Client, message: Message):
                         
                         if len(result) <= 500 and len(user_input) <= 500:
                             conversation_cache[chat_id].append((user_input, result))
-                        if len(conversation_cache[chat_id]) > 30:
+                        if len(conversation_cache[chat_id]) > 15:
                             conversation_cache[chat_id].pop(0)
                         
                         return
@@ -561,7 +561,7 @@ async def group_chat_response(client: Client, message: Message):
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
                     asyncio.create_task(typing_effect(client, message, result))
 
-                    if len(result) <= 300 and len(user_input) <= 300:
+                    if len(result) <= 500 and len(user_input) <= 500:
                         conversation_cache[chat_id][user_id].append((user_input, result))
                     if len(conversation_cache[chat_id][user_id]) > 15:
                         conversation_cache[chat_id][user_id].pop(0)
