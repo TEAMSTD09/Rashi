@@ -317,7 +317,7 @@ async def chatbot_response(client: Client, message: Message):
         "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
         "- New Message jis language me aaya ho, ekdam usi lang me reply hona chahiye (default english bolna jab pura sentence english me ho to) aur reply jaisa emoji bhi.\n"
         "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare, aur suno reply me tum ye mat use krna:- ` (`your reply`) ok.\n"
-        "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY."
+        "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY. with the help of @itzAsuraa (nickname - The Captain)"
                 )
                 for user_msg, ai_reply in conversation_history[-15:]:
                     prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
