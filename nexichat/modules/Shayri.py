@@ -138,13 +138,7 @@ async def send_good_morning():
 async def restart_nexichat():
     os.system(f"kill -9 {os.getpid()} && bash start")
 
-#scheduler.add_job(send_good_night, trigger="cron", hour=23, minute=50)
-#scheduler.add_job(send_good_morning, trigger="cron", hour=6, minute=0)
 scheduler.add_job(restart_nexichat, trigger="cron", hour=8, minute=0)
 scheduler.add_job(restart_nexichat, trigger="cron", hour=18, minute=0)
-#scheduler.add_job(restart_nexichat, trigger="cron", hour=12, minute=0)
-#scheduler.add_job(restart_nexichat, trigger="cron", hour=16, minute=0)
-#scheduler.add_job(restart_nexichat, trigger="cron", hour=18, minute=0)
-scheduler.add_job(restart_nexichat, trigger="cron", hour=20, minute=0)
 scheduler.start()
 
