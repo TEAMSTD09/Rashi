@@ -198,7 +198,7 @@ async def save_reply(original_message: Message, reply_message: Message):
         is_chat = await chatai.find_one(reply_data)
         if not is_chat:
             await chatai.insert_one(reply_data)
-            replies_cache.append(reply_data)
+            
 
     except Exception as e:
         print(f"Error in save_reply: {e}")
@@ -214,21 +214,27 @@ async def remove_abusive_reply(reply_data):
     replies_cache = [reply for reply in replies_cache if reply != reply_data]
 
 async def get_reply(word: str):
-    global replies_cache
-    if not replies_cache:
-        await load_replies_cache()
+    try:
+        replies = await chatai.find().to_list(length=None)
+        relevant_replies = [reply for reply in replies if reply['word'] == word]
         
-    relevant_replies = [reply for reply in replies_cache if reply['word'] == word]
-    for reply in relevant_replies:
-        if reply.get('text') and await is_abuse_present(reply['text']):
-            await remove_abusive_reply(reply)
-    if not relevant_replies:
-        relevant_replies = replies_cache
-    
-    selected_reply = random.choice(relevant_replies) if relevant_replies else None
-    if selected_reply:
-        selected_reply["text"] = await is_url_present_and_replace(selected_reply["text"])
-    return selected_reply
+        for reply in relevant_replies:
+            if reply.get('text') and await is_abuse_present(reply['text']):
+                await remove_abusive_reply(reply)
+        
+        if not relevant_replies:
+            relevant_replies = replies
+        
+        selected_reply = random.choice(relevant_replies) if relevant_replies else None
+        
+        if selected_reply:
+            selected_reply["text"] = await is_url_present_and_replace(selected_reply["text"])
+        
+        return selected_reply
+
+    except Exception as e:
+        logging.exception(f"Error in get_reply function: {e}")
+        return None
 
 
 async def get_chat_language(chat_id):
