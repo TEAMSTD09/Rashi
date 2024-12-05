@@ -393,7 +393,11 @@ async def chatbot_response(client: Client, message: Message):
                                           
 @nexichat.on_message(filters.incoming & filters.group, group=-17)
 async def chatbot_responsee(client: Client, message: Message):
-    global blocklist, message_counts
+    global blocklist, message_counts, conversation_cache, user_data_cache
+    user_id = message.from_user.id if message.from_user else message.chat.id
+    chat_id = message.chat.id
+    current_time = datetime.now()
+    
     try:
         user_id = message.from_user.id
         chat_id = message.chat.id
@@ -485,32 +489,8 @@ async def chatbot_responsee(client: Client, message: Message):
                 except:
                     pass
 
-        if message.reply_to_message:
-            await save_reply(message.reply_to_message, message)
-
-    except MessageEmpty:
-        try:
-            await message.reply_text("🙄🙄")
-        except:
-            pass
-    except Exception as e:
-        return
-
-conversation_cache = {}
-user_data_cache = {}
-
-
-@app.on_message(filters.group, group=-18)
-async def group_chat_response(client: Client, message: Message):
-    global blocklist, message_counts, conversation_cache, user_data_cache
-    try:
-        user_id = message.from_user.id if message.from_user else message.chat.id
-        chat_id = message.chat.id
-        current_time = datetime.now()
-
-        blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
-
         if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
+            blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
             if user_id not in message_counts:
                 message_counts[user_id] = {"count": 1, "last_time": current_time}
             else:
@@ -575,5 +555,15 @@ async def group_chat_response(client: Client, message: Message):
                     return
             except requests.RequestException:
                 return await message.reply_text("**I am busy now, I will talk later bye!**")
+
+        if message.reply_to_message:
+            await save_reply(message.reply_to_message, message)
+
+    except MessageEmpty:
+        try:
+            await message.reply_text("🙄🙄")
+        except:
+            pass
     except Exception as e:
         return
+
