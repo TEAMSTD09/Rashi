@@ -40,7 +40,7 @@ cloneownerdb = mongodb.cloneownerdb
 idclonebotdb = mongodb.idclonebotdb
 
 
-@app.on_message(filters.command(["gidclone"]))
+@app.on_message(filters.command(["idclone"]))
 async def clone_txt(client, message):
     if len(message.command) > 1:
         string_session = message.text.split("/idclone", 1)[1].strip()
@@ -112,7 +112,7 @@ async def clone_txt(client, message):
         await message.reply_text("**Provide a Pyrogram String Session after the /idclone **\n\n**Example:** `/idclone string session paste here`\n\n**Get a Pyrogram string session from here:-** [Click Here](https://t.me/VIP_CREATORS/1393) ")
 
 
-@app.on_message(filters.command("gidcloned"))
+@app.on_message(filters.command("idcloned"))
 async def list_cloned_sessions(client, message):
     try:
         cloned_sessions = await idclonebotdb.find().to_list(length=None)
@@ -135,7 +135,7 @@ async def list_cloned_sessions(client, message):
         await message.reply_text("**An error occurred while listing cloned sessions.**")
         
 @app.on_message(
-    filters.command(["gdelidclone", "gdelcloneid", "gdeleteidclone", "gremoveidclone"])
+    filters.command(["delidclone", "delcloneid", "deleteidclone", "removeidclone"])
 )
 async def delete_cloned_session(client, message):
     try:
@@ -160,7 +160,7 @@ async def delete_cloned_session(client, message):
         logging.exception(e)
 
 
-@app.on_message(filters.command("gdelallidclone") & filters.user(int(OWNER_ID)))
+@app.on_message(filters.command("delallidclone") & filters.user(int(OWNER_ID)))
 async def delete_all_cloned_sessions(client, message):
     try:
         a = await message.reply_text("**Deleting all cloned sessions...**")
