@@ -205,6 +205,7 @@ async def restart_bots():
                     logging.info(f"Removed expired or invalid token for bot ID: {bot['bot_id']}")
                 except Exception as e:
                     logging.exception(f"Error while restarting bot with token {bot_token}: {e}")
+                    await app.send_message(OWNER_ID, f"**Error In Restart Cloned Bots...**\n\n**Error:** {e}")
         
         await asyncio.gather(*(restart_bot(bot) for bot in bots))
         
