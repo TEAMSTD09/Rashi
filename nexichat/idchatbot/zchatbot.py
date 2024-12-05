@@ -315,8 +315,9 @@ async def chatbot_response(client: Client, message: Message):
                     result = json_response.get("data", "").strip()
 
                     if result:
-                        await client.send_chat_action(message.chat.id, ChatAction.TYPING)
-                        asyncio.create_task(typing_effect(client, message, result))
+                        await client.send_chat_action(chat_id, ChatAction.TYPING)
+                        await asyncio.sleep(2)
+                        await message.reply_text(result)
                         
                         if len(result) <= 500 and len(user_input) <= 500:
                             conversation_cache[chat_id].append((user_input, result))
@@ -354,7 +355,9 @@ async def chatbot_response(client: Client, message: Message):
                 elif reply_data["check"] == "voice":
                     await message.reply_voice(reply_data["text"])
                 else:
-                    asyncio.create_task(typing_effect(client, message, translated_text))
+                    await client.send_chat_action(chat_id, ChatAction.TYPING)
+                    await asyncio.sleep(2)
+                    await message.reply_text(translated_text)
             else:
                 await message.reply_text("**I don't understand. What are you saying?**")
 
@@ -437,7 +440,9 @@ async def chatbot_responsee(client: Client, message: Message):
                         pass
                 else:
                     try:
-                        asyncio.create_task(typing_effect(client, message, translated_text))
+                        await client.send_chat_action(chat_id, ChatAction.TYPING)
+                        await asyncio.sleep(2)
+                        await message.reply_text(translated_text)
                     except:
                         pass
             else:
@@ -502,7 +507,8 @@ async def chatbot_responsee(client: Client, message: Message):
 
                 if result:
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
-                    asyncio.create_task(typing_effect(client, message, result))
+                    await asyncio.sleep(2)
+                    await message.reply_text(result)
 
                     if len(result) <= 500 and len(user_input) <= 500:
                         conversation_cache[chat_id][user_id].append((user_input, result))
