@@ -315,8 +315,8 @@ async def chatbot_response(client: Client, message: Message):
                     result = json_response.get("data", "").strip()
 
                     if result:
+                        await asyncio.sleep(1)
                         await client.send_chat_action(chat_id, ChatAction.TYPING)
-                        await asyncio.sleep(2)
                         await message.reply_text(result)
                         
                         if len(result) <= 500 and len(user_input) <= 500:
@@ -355,8 +355,9 @@ async def chatbot_response(client: Client, message: Message):
                 elif reply_data["check"] == "voice":
                     await message.reply_voice(reply_data["text"])
                 else:
+                    await asyncio.sleep(1)
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
-                    await asyncio.sleep(2)
+                    
                     await message.reply_text(translated_text)
             else:
                 await message.reply_text("**I don't understand. What are you saying?**")
@@ -440,8 +441,9 @@ async def chatbot_responsee(client: Client, message: Message):
                         pass
                 else:
                     try:
+                        await asyncio.sleep(1)
                         await client.send_chat_action(chat_id, ChatAction.TYPING)
-                        await asyncio.sleep(2)
+                        
                         await message.reply_text(translated_text)
                     except:
                         pass
@@ -506,8 +508,9 @@ async def chatbot_responsee(client: Client, message: Message):
                 result = json_response.get("data", "").strip()
 
                 if result:
+                    await asyncio.sleep(1)
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
-                    await asyncio.sleep(2)
+                    
                     await message.reply_text(result)
 
                     if len(result) <= 500 and len(user_input) <= 500:
