@@ -10,8 +10,8 @@ from pyrogram.types import BotCommand
 from config import OWNER_ID
 from nexichat import LOGGER, nexichat, userbot, load_clone_owners
 from nexichat.modules import ALL_MODULES
-#from nexichat.modules.Clone import restart_bots
-#from nexichat.modules.Id_Clone import restart_idchatbots
+from nexichat.modules.Clone import restart_bots
+from nexichat.modules.Id_Clone import restart_idchatbots
 
 async def anony_boot():
     try:
@@ -21,10 +21,10 @@ async def anony_boot():
         except Exception as ex:
             LOGGER.info(f"@{nexichat.username} Started, please start the bot from owner id.")
     
-        #asyncio.create_task(restart_bots())
-        #print("Restarting all cloned botsbin background")
-        #asyncio.create_task(restart_idchatbots())
-       # print("Restarting all id chatbot in background")
+        asyncio.create_task(restart_bots())
+        print("Restarting all cloned botsbin background")
+        asyncio.create_task(restart_idchatbots())
+        print("Restarting all id chatbot in background")
         await load_clone_owners()
         #await asyncio.sleep(5)
         
