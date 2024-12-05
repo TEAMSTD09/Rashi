@@ -210,7 +210,7 @@ async def restart_bots():
         
     except Exception as e:
         logging.exception("Error while restarting bots.")
-
+        await app.send_message(OWNER_ID, f"**Remove The Bot token from cloned:**\n\n`{bot_token}`\n\n**Error:** {e}")
 @app.on_message(filters.command("delallclone") & filters.user(int(OWNER_ID)))
 async def delete_all_cloned_bots(client, message):
     try:
