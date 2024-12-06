@@ -53,13 +53,10 @@ async def clone_txt(client, message):
                 no_updates=False,
                 plugins=dict(root="nexichat.idchatbot"),
             )
-            await ai.start()
-            user = await ai.get_me()
-            clone_id = user.id
-            username = user.username or user.first_name
-
+            
+            
             # Check if the session is already cloned
-            existing_clone = await idclonebotdb.find_one({"user_id": clone_id})
+            existing_clone = await idclonebotdb.find_one({string_session})
             if existing_clone:
                 await mi.edit_text(
                     f"**Session for @{username} is already cloned!**\n"
@@ -67,6 +64,11 @@ async def clone_txt(client, message):
                 )
                 await ai.stop()
                 return
+
+            await ai.start()
+            user = await ai.get_me()
+            clone_id = user.id
+            username = user.username or user.first_name
 
             # Save the clone information in the database
             details = {
