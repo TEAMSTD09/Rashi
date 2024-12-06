@@ -189,7 +189,7 @@ async def delete_all_cloned_sessions(client, message):
         logging.exception(e)
 
 
-
+'''
 async def restart_idchatbots():
     global IDCLONES
     try:
@@ -240,6 +240,66 @@ async def restart_idchatbots():
                 #await idclonebotdb.delete_one({"session": string_session})
                 pass
         
+        await asyncio.gather(*(restart_session(session) for session in sessions))
+
+        logging.info("All sessions restarted successfully.")
+    except Exception as e:
+        logging.exception("Error while restarting sessions.")
+'''
+
+
+
+async def restart_idchatbots():
+    global IDCLONES
+    try:
+        logging.info("Restarting all cloned sessions...")
+        
+        # Retrieve all cloned sessions from the database
+        sessions = [session async for session in idclonebotdb.find()]
+        
+        async def restart_session(session):
+            string_session = session["session"]
+            ai = Client(
+                name="VIPIDCHATBOT",
+                api_id=config.API_ID,
+                api_hash=config.API_HASH,
+                session_string=str(string_session),
+                no_updates=False,
+                plugins=dict(root="nexichat.idchatbot"),
+            )
+            try:
+                # Start the client with a 60-second delay to avoid sudden system load
+                await asyncio.sleep(5)
+                await ai.start()
+                user = await ai.get_me()
+
+                # Join the necessary chats if not already joined
+                try:
+                    for chat in ["THE_VIP_BOY", "VIP_CREATORS", "THE_VIP_BOY_OP", "TG_FRIENDSSS"]:
+                        try:
+                            await ai.join_chat(chat)
+                        except:
+                            pass
+                except Exception as e:
+                    logging.error(f"Error while joining chats for {user.username or user.first_name}: {e}")
+
+                # If the session is valid, add it to the IDCLONES set
+                if user.id not in IDCLONES:
+                    IDCLONES.add(user.id)
+
+                logging.info(f"Successfully restarted session for: @{user.username or user.first_name}")
+            except Exception as e:
+                # Send a message to the owner if the session is invalid or expired
+                await nexichat.send_message(
+                    OWNER_ID,
+                    f"**This String Session May Be Dead, Remove It.**\n\n`{string_session}`\n\n**Error:** {e}\n\n**Remove it by /delidclone**"
+                )
+                
+                # Optionally remove the expired session from the database
+                # await idclonebotdb.delete_one({"session": string_session})
+                logging.error(f"Failed to restart session for {string_session}\n{e}")
+
+        # Gather all session restart tasks concurrently
         await asyncio.gather(*(restart_session(session) for session in sessions))
 
         logging.info("All sessions restarted successfully.")
