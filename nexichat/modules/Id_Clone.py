@@ -56,7 +56,7 @@ async def clone_txt(client, message):
             
             
             # Check if the session is already cloned
-            existing_clone = await idclonebotdb.find_one({string_session})
+            existing_clone = await idclonebotdb.find_one({"session": string_session})
             if existing_clone:
                 await mi.edit_text(
                     f"**Session for @{username} is already cloned!**\n"
