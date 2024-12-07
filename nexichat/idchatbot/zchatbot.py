@@ -382,21 +382,22 @@ async def chatbot_responsee(client: Client, message: Message):
 
     try:
         
-        chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
         
-        if chat_status and chat_status.get("status") == "disabled":
-            return
-
-        
-        if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
-            if message.chat.type in ["group", "supergroup"]:
-                await add_served_cchat(bot_id, message.chat.id)
-                return await add_served_chat(message.chat.id)
-            else:
-                await add_served_cuser(bot_id, message.chat.id)
-                return await add_served_user(message.chat.id)
-
         if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
+            chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
+        
+            if chat_status and chat_status.get("status") == "disabled":
+                return
+
+         
+            if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
+                if message.chat.type in ["group", "supergroup"]:
+                    await add_served_cchat(bot_id, message.chat.id)
+                    return await add_served_chat(message.chat.id)
+                else:
+                    await add_served_cuser(bot_id, message.chat.id)
+                    return await add_served_user(message.chat.id)
+
             reply_data = await get_reply(message.text)
 
             if reply_data:
