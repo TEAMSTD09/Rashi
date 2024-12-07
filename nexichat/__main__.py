@@ -26,7 +26,6 @@ async def anony_boot():
         asyncio.create_task(restart_idchatbots())
         print("Restarting all id chatbot in background")
         await load_clone_owners()
-        #await asyncio.sleep(5)
         
         if config.STRING1:
             try:
