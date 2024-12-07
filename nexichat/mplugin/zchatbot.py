@@ -28,11 +28,11 @@ mp_blocklist = {}
 mp_message_counts = {}
 mp_conversation_cache = {}
 conversation_histories = {}
-replies_cache = mp_reply
-abuse_cache = mp_abuse
-blocklist = mp_blocklist
-message_counts = mp_message_counts
-conversation_cache = mp_conversation_cache
+replies_cache = []
+abuse_cache = []
+blocklist = {}
+message_counts = {}
+conversation_cache = {}
 
 
 async def load_abuse_cache():
