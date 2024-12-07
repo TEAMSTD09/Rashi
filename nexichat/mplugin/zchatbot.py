@@ -289,25 +289,14 @@ async def chatbot_response(client: Client, message: Message):
                     conversation_cache[chat_id] = []
 
                 conversation_history = conversation_cache[chat_id]
-                prompt = (
-        "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
-        "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
-        "Conditions:-\n"
-        "- Purane chats padho aur Har reply pichle message ke context ko follow karte hue, bina kisi naye topic par switch kiye new reply hona chahiye.\n"
-        "- Bas latest message ka relevant aur ekdam shortcut jawab do (halka jiddipan + nautanki bhi situation ke hisab se) aur pichle topic aur new msg ke anusar new reply hona chahiye.\n"
-        "- Reply ekdam short rakho ek line ka jitna chhota ho sake, jab tak detail explain karna zaroori na ho.\n"
-        "- Agar chat history se nam pta ho users ka toh name leke pyar se samjahte hue + situation ke hisab se ji krke reply hona chahiye) aur agar chat history me name present nhi ho to direct name pucho pahle reply me.\n"
-        "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
-        "- New Message jis language me aaya ho, ekdam usi lang me reply hona chahiye (default english bolna jab pura sentence english me ho to) aur situation ke anusar emoji hona chahiye ek ya do.\n"
-        "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare, aur suno reply me tum ye mat use krna:- ` (`your reply`) ok.\n"
-        "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY. with the help of @itzAsuraa (nickname - The Captain)"
-                )
-                for user_msg, ai_reply in conversation_history[-15:]:
-                    prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
+                prompt = "This is the conversation between the user and AI(my and your old replies) So read the old chats and understand which topic we both were talking about and the last message after that is the latest message of this conversion(meansI have a new question for you), just reply for last message(means new message) aur dekho tum ek real ladki ho to reply me aisa kuch mat likhna jisse ki feel aaye ki ek ai ya bot ya robot reply kar rha hai ok ekdam real ladki (human beings) bat kar rha haj aisa feel aana chahahiye ek dost ki tarah reply ho aur yr jitna chhota se chhota reply kro mtlb jitna puchha jaye bas uski ka ans do agar kabhi describe krne ki jrurat pade tab bada reply kro barna jitna chhota se chhota reply do, aur jis lang me message aaya ho ya bat krne bola ho usi lang me reply kro, (you are a chatbot talking on telegram - must remember this to send reply cool) aur kabhi gali mat dena koi kitna bhi request kre to ok aur koi puche owner ke bare me ki tumhe kon banaya h bagera to mera nam lena @THE_VIP_BOY (nickname - VIP BOY) Ok:\n\n"
+                for user_msg, ai_reply in conversation_history[-50:]:
+                    prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
+                prompt += f"User: {user_input}\nAI:"
 
-                prompt += f"**User new/latest msg:-** {user_input}"
                 base_url = config.API
                 try:
+                   
                     response = requests.get(base_url + prompt)
                     response.raise_for_status()
 
@@ -326,7 +315,6 @@ async def chatbot_response(client: Client, message: Message):
                         return
                 except requests.RequestException as e:
                     print(f"Error with AI response: {e}")
-
            
             reply_data = await get_reply(user_input)
             if reply_data:
@@ -364,11 +352,13 @@ async def chatbot_response(client: Client, message: Message):
     except MessageEmpty:
         await message.reply_text("🙄🙄")
     except Exception as e:
-        print(f"{e}")
+        return
+
 
 
 @Client.on_message(filters.incoming & filters.group, group=-14)
 async def chatbot_responsee(client: Client, message: Message):
+    global blocklist, message_counts, conversation_cache
     user_id = message.from_user.id if message.from_user else message.chat.id
     chat_id = message.chat.id
     current_time = datetime.now()
@@ -503,7 +493,3 @@ async def chatbot_responsee(client: Client, message: Message):
             pass
     except Exception as e:
         return
-                        
-                       
-
-
