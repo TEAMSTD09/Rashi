@@ -156,13 +156,13 @@ async def save_reply(original_message: Message, reply_message: Message):
             try:
                 if (await is_abuse_present(original_message.text) or await is_url_present(original_message.text)):
                     return
-            except:
+            except Exception as e:
                 pass
         if reply_message == reply_message.text:
             try:
                 if (await is_abuse_present(reply_message.text) or await is_url_present(reply_message.text)):
                     return
-            except:
+            except Exception as e:
                 pass
 
                 
@@ -441,42 +441,42 @@ async def chatbot_responsee(client: Client, message: Message):
                 if reply_data["check"] == "sticker":
                     try:
                         await message.reply_sticker(reply_data["text"])
-                    except:
+                    except Exception as e:
                         pass
                 elif reply_data["check"] == "photo":
                     try:
                         await message.reply_photo(reply_data["text"])
-                    except:
+                    except Exception as e:
                         pass
                 elif reply_data["check"] == "video":
                     try:
                         await message.reply_video(reply_data["text"])
-                    except:
+                    except Exception as e:
                         pass
                 elif reply_data["check"] == "audio":
                     try:
                         await message.reply_audio(reply_data["text"])
-                    except:
+                    except Exception as e:
                         pass
                 elif reply_data["check"] == "gif":
                     try:
                         await message.reply_animation(reply_data["text"])
-                    except:
+                    except Exception as e:
                         pass
                 elif reply_data["check"] == "voice":
                     try:
                         await message.reply_voice(reply_data["text"])
-                    except:
+                    except Exception as e:
                         pass
                 else:
                     try:
                         await message.reply_text(translated_text)
-                    except:
+                    except Exception as e:
                         pass
             else:
                 try:
                     await message.reply_text("**I don't understand. What are you saying?**")
-                except:
+                except Exception as e:
                     pass
 
         if message.reply_to_message:
@@ -485,7 +485,7 @@ async def chatbot_responsee(client: Client, message: Message):
     except MessageEmpty:
         try:
             await message.reply_text("🙄🙄")
-        except:
+        except Exception as e:
             pass
     except Exception as e:
         return
