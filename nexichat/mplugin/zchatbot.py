@@ -375,76 +375,6 @@ async def chatbot_responsee(client: Client, message: Message):
     chat_id = message.chat.id
     bot_id = client.me.id
     try:
-        
-        chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
-        
-        if chat_status and chat_status.get("status") == "disabled":
-            return
-
-        
-        if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
-            if message.chat.type in ["group", "supergroup"]:
-                await add_served_cchat(bot_id, message.chat.id)
-                return await add_served_chat(message.chat.id)
-            else:
-                await add_served_cuser(bot_id, message.chat.id)
-                return await add_served_user(message.chat.id)
-
-        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
-            reply_data = await get_reply(message.text)
-
-            if reply_data:
-                response_text = reply_data["text"]
-                chat_lang = await get_chat_language(chat_id, bot_id)
-
-                if not chat_lang or chat_lang == "nolang":
-                    translated_text = response_text
-                else:
-                    translated_text = GoogleTranslator(source='auto', target=chat_lang).translate(response_text)
-                    if not translated_text:
-                        translated_text = response_text
-                if reply_data["check"] == "sticker":
-                    try:
-                        await message.reply_sticker(reply_data["text"])
-                    except:
-                        pass
-                elif reply_data["check"] == "photo":
-                    try:
-                        await message.reply_photo(reply_data["text"])
-                    except:
-                        pass
-                elif reply_data["check"] == "video":
-                    try:
-                        await message.reply_video(reply_data["text"])
-                    except:
-                        pass
-                elif reply_data["check"] == "audio":
-                    try:
-                        await message.reply_audio(reply_data["text"])
-                    except:
-                        pass
-                elif reply_data["check"] == "gif":
-                    try:
-                        await message.reply_animation(reply_data["text"])
-                    except:
-                        pass
-                elif reply_data["check"] == "voice":
-                    try:
-                        await message.reply_voice(reply_data["text"])
-                    except:
-                        pass
-                else:
-                    try:
-                        await message.reply_text(translated_text)
-                    except:
-                        pass
-            else:
-                try:
-                    await message.reply_text("**I don't understand. What are you saying?**")
-                except:
-                    pass
-
-        
         if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
             
             if chat_id not in conversation_cache:
@@ -493,6 +423,76 @@ async def chatbot_responsee(client: Client, message: Message):
             except requests.RequestException:
                 return await message.reply_text("**I am busy now, I will talk later bye!**")
 
+        
+        chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
+        
+        if chat_status and chat_status.get("status") == "disabled":
+            return
+
+        
+        if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
+            if message.chat.type in ["group", "supergroup"]:
+                await add_served_cchat(bot_id, message.chat.id)
+                return await add_served_chat(message.chat.id)
+            else:
+                await add_served_cuser(bot_id, message.chat.id)
+                return await add_served_user(message.chat.id)
+
+        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
+            reply_data = await get_reply(message.text)
+
+            if reply_data:
+                response_text = reply_data["text"]
+                chat_lang = await get_chat_language(chat_id, bot_id)
+
+                if not chat_lang or chat_lang == "nolang":
+                    translated_text = response_text
+                else:
+                    translated_text = GoogleTranslator(source='auto', target=chat_lang).translate(response_text)
+                    if not translated_text:
+                        translated_text = response_text
+                if reply_data["check"] == "sticker":
+                    try:
+                        await message.reply_sticker(reply_data["text"])
+                    except Exception as e:
+                        pass
+                elif reply_data["check"] == "photo":
+                    try:
+                        await message.reply_photo(reply_data["text"])
+                    except Exception as e:
+                        pass
+                elif reply_data["check"] == "video":
+                    try:
+                        await message.reply_video(reply_data["text"])
+                    except Exception as e:
+                        pass
+                elif reply_data["check"] == "audio":
+                    try:
+                        await message.reply_audio(reply_data["text"])
+                    except Exception as e:
+                        pass
+                elif reply_data["check"] == "gif":
+                    try:
+                        await message.reply_animation(reply_data["text"])
+                    except Exception as e:
+                        pass
+                elif reply_data["check"] == "voice":
+                    try:
+                        await message.reply_voice(reply_data["text"])
+                    except Exception as e:
+                        pass
+                else:
+                    try:
+                        await message.reply_text(translated_text)
+                    except Exception as e:
+                        pass
+            else:
+                try:
+                    await message.reply_text("**I don't understand. What are you saying?**")
+                except Exception as e:
+                    pass
+
+     
         if message.reply_to_message:
             await save_reply(message.reply_to_message, message)
 
