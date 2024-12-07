@@ -266,7 +266,13 @@ async def typing_effect(client, message, translated_text):
 
 @Client.on_message(filters.private, group=-12)
 async def chatbot_response(client: Client, message: Message):
-    global blocklist, message_counts, conversation_cache
+    global mp_reply, mp_abuse, mp_blocklist, mp_message_counts, mp_conversation_cache
+    replies_cache = mp_reply
+    abuse_cache = mp_abuse
+    blocklist = mp_blocklist
+    message_counts = mp_message_counts
+    conversation_cache = mp_conversation_cache
+
     user_id = message.from_user.id
     chat_id = message.chat.id
     user_input = None
@@ -364,7 +370,13 @@ async def chatbot_response(client: Client, message: Message):
 
 @Client.on_message(filters.incoming & filters.group, group=-13)
 async def chatbot_responsee(client: Client, message: Message):
-    global blocklist, message_counts, conversation_cache
+    global mp_reply, mp_abuse, mp_blocklist, mp_message_counts, mp_conversation_cache
+    replies_cache = mp_reply
+    abuse_cache = mp_abuse
+    blocklist = mp_blocklist
+    message_counts = mp_message_counts
+    conversation_cache = mp_conversation_cache
+    
     user_id = message.from_user.id if message.from_user else message.chat.id
     chat_id = message.chat.id
     current_time = datetime.now()
