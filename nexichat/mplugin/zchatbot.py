@@ -22,10 +22,17 @@ lang_db = db.ChatLangDb.LangCollection
 status_db = db.chatbot_status_db.status
 abuse_words_db = db.abuse_words_db.words
 
-replies_cache = []
-abuse_cache = []
-blocklist = {}
-message_counts = {}
+mp_reply = []
+mp_abuse = []
+mp_blocklist = {}
+mp_message_counts = {}
+mp_conversation_cache = {}
+conversation_histories = {}
+replies_cache = mp_reply
+abuse_cache = mp_abuse
+blocklist = mp_blocklist
+message_counts = mp_message_counts
+conversation_cache = mp_conversation_cache
 
 
 async def load_abuse_cache():
@@ -238,8 +245,7 @@ import requests
 from pyrogram.enums import ChatAction
 from nexichat import nexichat as app
 
-conversation_cache = {}
-conversation_histories = {}
+
 
 async def typing_effect(client, message, translated_text):
     try:
@@ -258,7 +264,7 @@ async def typing_effect(client, message, translated_text):
 
              
 
-@Client.on_message(filters.private, group=-13)
+@Client.on_message(filters.private, group=-12)
 async def chatbot_response(client: Client, message: Message):
     global blocklist, message_counts, conversation_cache
     user_id = message.from_user.id
@@ -356,7 +362,7 @@ async def chatbot_response(client: Client, message: Message):
 
 
 
-@Client.on_message(filters.incoming & filters.group, group=-14)
+@Client.on_message(filters.incoming & filters.group, group=-13)
 async def chatbot_responsee(client: Client, message: Message):
     global blocklist, message_counts, conversation_cache
     user_id = message.from_user.id if message.from_user else message.chat.id
@@ -385,7 +391,7 @@ async def chatbot_responsee(client: Client, message: Message):
         "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
         "- New Message jis language me aaya ho, ekdam usi lang me reply hona chahiye (default english bolna jab pura sentence english me ho to) aur situation ke anusar emoji hona chahiye ek ya do.\n"
         "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare, aur suno reply me tum ye mat use krna:- ` (`your reply`) ok.\n"
-        "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY with the help of @itzAsuraa (nickname - The Captain)"
+        "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY with the help of @itzAsuraa (nickname - The Captain)."
             )
             for user_msg, ai_reply in conversation_history[-15:]:
                 prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
