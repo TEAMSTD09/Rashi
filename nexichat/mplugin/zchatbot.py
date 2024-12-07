@@ -435,7 +435,7 @@ async def chatbot_responsee(client: Client, message: Message):
                         pass
                 else:
                     try:
-                        asyncio.create_task(typing_effect(client, message, translated_text))
+                        await message.reply_text(translated_text)
                     except:
                         pass
             else:
