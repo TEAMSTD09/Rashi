@@ -431,7 +431,7 @@ async def getid(client, message):
         parse_mode=ParseMode.DEFAULT,
     )
 
-
+"""
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -584,4 +584,4 @@ async def broadcast_message(client, message):
             IS_BROADCASTING = False
 
 
-    
+  """
