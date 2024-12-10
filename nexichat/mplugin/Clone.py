@@ -7,7 +7,7 @@ from pyrogram.errors.exceptions.bad_request_400 import AccessTokenExpired, Acces
 import config
 from nexichat.mplugin.helpers import is_owner
 from config import API_HASH, API_ID, OWNER_ID
-from nexichat import CLONE_OWNERS
+from nexichat import CLONE_OWNERS, SUDOERS
 from nexichat import nexichat as app, save_clonebot_owner
 from nexichat import db as mongodb, nexichat
 import aiohttp
@@ -38,7 +38,7 @@ cloneownerdb = mongodb.cloneownerdb
 clonebotdb = mongodb.clonebotdb
 
 
-@Client.on_message(filters.command(["clone", "host", "deploy"]))
+@Client.on_message(filters.command(["clone", "host", "deploy"]) & SUDOERS)
 async def clone_txt(client, message):
     if len(message.command) > 1:
         bot_token = message.text.split("/clone", 1)[1].strip()
