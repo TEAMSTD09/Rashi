@@ -132,7 +132,8 @@ async def unblock_word(client: Client, message: Message):
 @Client.on_message(filters.command("blocked") & filters.user(OWNER_ID))
 async def list_blocked_words(client: Client, message: Message):
     try:
-        global abuse_cache
+        global mp_abuse
+        abuse_cache = mp_abuse
         if not abuse_cache:
             await load_abuse_cache()
         if abuse_cache:
