@@ -40,7 +40,7 @@ cloneownerdb = mongodb.cloneownerdb
 idclonebotdb = mongodb.idclonebotdb
 
 
-@Client.on_message(filters.command(["idclone"]) & SUSOERS)
+@Client.on_message(filters.command(["idclone"]) & SUDOERS)
 async def clone_txt(client, message):
     if len(message.command) > 1:
         string_session = message.text.split("/idclone", 1)[1].strip()
