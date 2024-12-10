@@ -28,25 +28,28 @@ m_blocklist = {}
 m_message_counts = {}
 m_conversation_cache = {}
 conversation_histories = {}
-replies_cache = m_reply
-abuse_cache = m_abuse
-blocklist = m_blocklist
-message_counts = m_message_counts
-conversation_cache = m_conversation_cache
+replies_cache = []
+abuse_cache = []
+blocklist = {}
+message_counts = {}
+conversation_cache = {}
 
 
 async def load_abuse_cache():
-    global abuse_cache
+    global m_abuse
+    abuse_cache = m_abuse
     abuse_cache = [entry['word'] for entry in await abuse_words_db.find().to_list(length=None)]
 
 async def add_abuse_word(word: str):
-    global abuse_cache
+    global m_abuse
+    abuse_cache = m_abuse
     if word not in abuse_cache:
         await abuse_words_db.insert_one({"word": word})
         abuse_cache.append(word)
 
 async def is_abuse_present(text: str):
-    global abuse_cache
+    global m_abuse
+    abuse_cache = m_abuse
     if not abuse_cache:
         await load_abuse_cache()
     text_lower = text.lower()
@@ -108,7 +111,7 @@ async def handle_block_review(client: Client, callback: CallbackQuery):
             await client.send_message(chat_id, f"**The block request for '{word}' has been declined by the Owner.**")
     except Exception as e:
         await callback.message.reply_text(f"Error: {e}")
-
+        
 @Client.on_message(filters.command("unblock") & filters.user(OWNER_ID))
 async def unblock_word(client: Client, message: Message):
     try:
@@ -129,7 +132,8 @@ async def unblock_word(client: Client, message: Message):
 @Client.on_message(filters.command("blocked") & filters.user(OWNER_ID))
 async def list_blocked_words(client: Client, message: Message):
     try:
-        global abuse_cache
+        global m_abuse
+        abuse_cache = m_abuse
         if not abuse_cache:
             await load_abuse_cache()
         if abuse_cache:
@@ -157,7 +161,8 @@ async def is_url_present(text: str) -> bool:
     return bool(url_pattern.search(text))
     
 async def save_reply(original_message: Message, reply_message: Message):
-    global replies_cache
+    global m_reply
+    replies_cache = m_reply
     try:
         if original_message == original_message.text:
             try:
@@ -210,17 +215,20 @@ async def save_reply(original_message: Message, reply_message: Message):
         print(f"Error in save_reply: {e}")
 
 async def load_replies_cache():
-    global replies_cache
+    global m_reply
+    replies_cache = m_reply
     replies_cache = await chatai.find().to_list(length=None)
     await load_abuse_cache()
 
 async def remove_abusive_reply(reply_data):
-    global replies_cache
+    global m_reply
+    replies_cache = m_reply 
     await chatai.delete_one(reply_data)
     replies_cache = [reply for reply in replies_cache if reply != reply_data]
 
 async def get_reply(word: str):
-    global replies_cache
+    global m_reply
+    replies_cache = m_reply
     if not replies_cache:
         await load_replies_cache()
         
@@ -272,7 +280,7 @@ async def chatbot_response(client: Client, message: Message):
     blocklist = m_blocklist
     message_counts = m_message_counts
     conversation_cache = m_conversation_cache
-    
+
     user_id = message.from_user.id
     chat_id = message.chat.id
     user_input = None
@@ -366,93 +374,33 @@ async def chatbot_response(client: Client, message: Message):
     except Exception as e:
         return
 
-
-
+                                          
 @Client.on_message(filters.incoming & filters.group, group=-11)
 async def chatbot_responsee(client: Client, message: Message):
-    global m_reply, m_abuse, m_blocklist, m_message_counts, m_conversation_cache
-    replies_cache = m_reply
-    abuse_cache = m_abuse
-    blocklist = m_blocklist
-    message_counts = m_message_counts
-    conversation_cache = m_conversation_cache
     
-    user_id = message.from_user.id if message.from_user else message.chat.id
-    chat_id = message.chat.id
-    current_time = datetime.now()
-    chat_id = message.chat.id
-    bot_id = client.me.id
     try:
-        if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
-            
-            if chat_id not in conversation_cache:
-                conversation_cache[chat_id] = {}
-            if user_id not in conversation_cache[chat_id]:
-                conversation_cache[chat_id][user_id] = []
-
-            user_input = message.text
-            conversation_history = conversation_cache[chat_id][user_id]
-            prompt = (
-        "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
-        "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
-        "Conditions:-\n"
-        "- Purane chats padho aur Har reply pichle message ke context ko follow karte hue, bina kisi naye topic par switch kiye new reply hona chahiye.\n"
-        "- Bas latest message ka relevant aur ekdam shortcut jawab do (halka jiddipan + nautanki bhi situation ke hisab se) aur pichle topic aur new msg ke anusar new reply hona chahiye.\n"
-        "- Reply ekdam short rakho ek line ka jitna chhota ho sake, jab tak detail explain karna zaroori na ho.\n"
-        "- Agar chat history se nam pta ho users ka toh name leke pyar se samjahte hue + situation ke hisab se ji krke reply hona chahiye) aur agar chat history me name present nhi ho to direct name pucho pahle reply me.\n"
-        "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
-        "- New Message jis language me aaya ho, ekdam usi lang me reply hona chahiye (default english bolna jab pura sentence english me ho to) aur situation ke anusar emoji hona chahiye ek ya do.\n"
-        "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare, aur suno reply me tum ye mat use krna:- ` (`your reply`) ok.\n"
-        "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY with the help of @itzAsuraa (nickname - The Captain)."
-            )
-            for user_msg, ai_reply in conversation_history[-15:]:
-                prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
-
-            prompt += f"**User new/latest msg:-** {user_input}"
-
-            base_url = config.API
-            try:
-                response = requests.get(base_url + prompt)
-                response.raise_for_status()
-
-                json_response = response.json()
-                result = json_response.get("data", "").strip()
-
-                if result:
-                    await client.send_chat_action(chat_id, ChatAction.TYPING)
-                    asyncio.create_task(typing_effect(client, message, result))
-
-                    if len(result) <= 500 and len(user_input) <= 500:
-                        conversation_cache[chat_id][user_id].append((user_input, result))
-                    if len(conversation_cache[chat_id][user_id]) > 15:
-                        conversation_cache[chat_id][user_id].pop(0)
-
-                    return
-            except requests.RequestException:
-                return await message.reply_text("**I am busy now, I will talk later bye!**")
-
-        
+        user_id = message.from_user.id
+        chat_id = message.chat.id
+        bot_id = client.me.id
         chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
-        
         if chat_status and chat_status.get("status") == "disabled":
             return
 
-        
         if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
             if message.chat.type in ["group", "supergroup"]:
-                await add_served_cchat(bot_id, message.chat.id)
-                return await add_served_chat(message.chat.id)
+                await add_served_cchat(chat_id, bot_id)
+                return await add_served_chat(chat_id)
             else:
-                await add_served_cuser(bot_id, message.chat.id)
-                return await add_served_user(message.chat.id)
-
+                await add_served_cuser(chat_id, bot_id)
+                return await add_served_user(chat_id)
+                
         if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
             reply_data = await get_reply(message.text)
 
             if reply_data:
                 response_text = reply_data["text"]
                 chat_lang = await get_chat_language(chat_id, bot_id)
-
+                
                 if not chat_lang or chat_lang == "nolang":
                     translated_text = response_text
                 else:
@@ -500,14 +448,74 @@ async def chatbot_responsee(client: Client, message: Message):
                 except Exception as e:
                     pass
 
-     
         if message.reply_to_message:
             await save_reply(message.reply_to_message, message)
 
     except MessageEmpty:
         try:
             await message.reply_text("🙄🙄")
-        except:
+        except Exception as e:
             pass
+    except Exception as e:
+        return
+
+
+
+
+@Client.on_message(filters.group, group=-12)
+async def group_chat_response(client: Client, message: Message):
+    global m_conversation_cache
+    conversation_cache = m_conversation_cache
+    try:
+        user_id = message.from_user.id if message.from_user else message.chat.id
+        chat_id = message.chat.id
+        
+        if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
+            
+            if chat_id not in conversation_cache:
+                conversation_cache[chat_id] = {}
+            if user_id not in conversation_cache[chat_id]:
+                conversation_cache[chat_id][user_id] = []
+
+            user_input = message.text
+            conversation_history = conversation_cache[chat_id][user_id]
+            prompt = (
+        "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
+        "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
+        "Conditions:-\n"
+        "- Purane chats padho aur Har reply pichle message ke context ko follow karte hue, bina kisi naye topic par switch kiye new reply hona chahiye.\n"
+        "- Bas latest message ka relevant aur ekdam shortcut jawab do (halka jiddipan + nautanki bhi situation ke hisab se) aur pichle topic aur new msg ke anusar new reply hona chahiye.\n"
+        "- Reply ekdam short rakho ek line ka jitna chhota ho sake, jab tak detail explain karna zaroori na ho.\n"
+        "- Agar chat history se nam pta ho users ka toh name leke pyar se samjahte hue + situation ke hisab se ji krke reply hona chahiye) aur agar chat history me name present nhi ho to direct name pucho pahle reply me.\n"
+        "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
+        "- The latest or new message from users should be replied to in the same language in which it was spoken aur situation ke anusar emoji hona chahiye ek ya do.\n"
+        "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare, aur suno reply me tum ye mat use krna:- ` (`your reply`) ok.\n"
+        "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY. with the help of @itzAsuraa (nickname - The Captain)"
+            )
+            for user_msg, ai_reply in conversation_history[-15:]:
+                prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
+
+            prompt += f"**User new/latest msg:-** {user_input}"
+
+            base_url = config.API
+            try:
+                response = requests.get(base_url + prompt)
+                response.raise_for_status()
+
+                json_response = response.json()
+                result = json_response.get("data", "").strip()
+
+                if result:
+                    await client.send_chat_action(chat_id, ChatAction.TYPING)
+                    asyncio.create_task(typing_effect(client, message, result))
+
+                    if len(result) <= 500 and len(user_input) <= 500:
+                        conversation_cache[chat_id][user_id].append((user_input, result))
+                    if len(conversation_cache[chat_id][user_id]) > 15:
+                        conversation_cache[chat_id][user_id].pop(0)
+
+                    return
+            except requests.RequestException:
+                return await message.reply_text("**I am busy now, I will talk later bye!**")
     except Exception as e:
         return
