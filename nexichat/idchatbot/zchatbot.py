@@ -520,7 +520,7 @@ async def group_chat_response(client: Client, message: Message):
                     if len(conversation_cache[chat_id][user_id]) > 15:
                         conversation_cache[chat_id][user_id].pop(0)
 
-                    await CHATBOT = None
+                    CHATBOT = None
             except requests.RequestException:
                 return await message.reply_text("**I am busy now, I will talk later bye!**")
     except Exception as e:
