@@ -12,10 +12,11 @@ from nexichat.database.chats import add_served_chat
 from nexichat.database.users import add_served_user
 from nexichat.database import abuse_list, add_served_cchat, add_served_cuser, chatai
 from config import MONGO_URL, OWNER_ID
-from nexichat import nexichat, mongo, LOGGER, db, CHATBOT
+from nexichat import nexichat, mongo, LOGGER, db
 from nexichat.idchatbot.helpers import languages
 import asyncio
 
+CHATBOT = None
 translator = GoogleTranslator()
 
 lang_db = db.ChatLangDb.LangCollection
