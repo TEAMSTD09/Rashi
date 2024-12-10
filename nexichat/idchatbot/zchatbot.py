@@ -379,7 +379,7 @@ async def chatbot_response(client: Client, message: Message):
 @Client.on_message(filters.incoming & filters.group, group=-11)
 async def chatbot_responsee(client: Client, message: Message):
     global CHATBOT
-    if CHATBOT == True:
+    if CHATBOT:
         await asyncio.sleep(2)
     try:
         user_id = message.from_user.id
@@ -451,7 +451,7 @@ async def chatbot_responsee(client: Client, message: Message):
                     await message.reply_text("**I don't understand. What are you saying?**")
                 except Exception as e:
                     pass
-            CHATBOT = False
+            
         if message.reply_to_message:
             await save_reply(message.reply_to_message, message)
    
@@ -462,14 +462,15 @@ async def chatbot_responsee(client: Client, message: Message):
             pass
     except Exception as e:
         return
-
+    finally:
+        CHATBOT = False
 
 
 
 @Client.on_message(filters.group, group=-12)
 async def group_chat_response(client: Client, message: Message):
     global m_conversation_cache, CHATBOT
-    if CHATBOT == True:
+    if CHATBOT:
         await asyncio.sleep(2)
     conversation_cache = m_conversation_cache
     try:
@@ -521,8 +522,9 @@ async def group_chat_response(client: Client, message: Message):
                     if len(conversation_cache[chat_id][user_id]) > 15:
                         conversation_cache[chat_id][user_id].pop(0)
 
-                    CHATBOT = False
             except requests.RequestException:
                 return await message.reply_text("**I am busy now, I will talk later bye!**")
+            finally:
+                CHATBOT = False
     except Exception as e:
         return
