@@ -114,7 +114,11 @@ async def clone_txt(client, message):
             await message.reply_text("**Provide a Pyrogram String Session after the /idclone **\n\n**Example:** `/idclone string session paste here`\n\n**Get a Pyrogram string session from here:-** [Click Here](https://t.me/VIP_CREATORS/1393) ")
         except:
             return
-
+            
+@Client.on_message(filters.command(["idclone", "idhost", "iddeploy"]) & ~SUDOERS)
+async def clone(client, message):
+    await message.reply_text(f"**Sorry {message.from_user.mention}**\n\n**Clone Feature Is Now Paid 🥲**\n**Contact @itscutebacha For Get Clone Subscription.**")
+    
 @Client.on_message(filters.command("idcloned"))
 async def list_cloned_sessions(client, message):
     try:
