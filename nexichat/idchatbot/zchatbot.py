@@ -16,7 +16,7 @@ from nexichat import nexichat, mongo, LOGGER, db
 from nexichat.idchatbot.helpers import languages
 import asyncio
 
-CHATBOT = None
+CHATBOT = False
 translator = GoogleTranslator()
 
 lang_db = db.ChatLangDb.LangCollection
@@ -379,7 +379,7 @@ async def chatbot_response(client: Client, message: Message):
 @Client.on_message(filters.incoming & filters.group, group=-11)
 async def chatbot_responsee(client: Client, message: Message):
     global CHATBOT
-    if CHATBOT == LIVE:
+    if CHATBOT == True:
         await asyncio.sleep(2)
     try:
         user_id = message.from_user.id
@@ -398,7 +398,7 @@ async def chatbot_responsee(client: Client, message: Message):
                 return await add_served_user(chat_id)
                 
         if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
-            CHATBOT = LIVE
+            CHATBOT = True
             reply_data = await get_reply(message.text)
             
             if reply_data:
@@ -451,7 +451,7 @@ async def chatbot_responsee(client: Client, message: Message):
                     await message.reply_text("**I don't understand. What are you saying?**")
                 except Exception as e:
                     pass
-            CHATBOT = None
+            CHATBOT = False
         if message.reply_to_message:
             await save_reply(message.reply_to_message, message)
    
@@ -469,7 +469,7 @@ async def chatbot_responsee(client: Client, message: Message):
 @Client.on_message(filters.group, group=-12)
 async def group_chat_response(client: Client, message: Message):
     global m_conversation_cache, CHATBOT
-    if CHATBOT == LIVE:
+    if CHATBOT == True:
         await asyncio.sleep(2)
     conversation_cache = m_conversation_cache
     try:
@@ -486,7 +486,7 @@ async def group_chat_response(client: Client, message: Message):
             user_input = message.text
             conversation_history = conversation_cache[chat_id][user_id]
             prompt = (
-        "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
+        "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga "
         "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
         "Conditions:-\n"
         "- Purane chats padho aur Har reply pichle message ke context ko follow karte hue, bina kisi naye topic par switch kiye new reply hona chahiye.\n"
@@ -505,7 +505,7 @@ async def group_chat_response(client: Client, message: Message):
 
             base_url = config.API
             try:
-                CHATBOT = LIVE
+                CHATBOT = True
                 response = requests.get(base_url + prompt)
                 response.raise_for_status()
 
@@ -521,7 +521,7 @@ async def group_chat_response(client: Client, message: Message):
                     if len(conversation_cache[chat_id][user_id]) > 15:
                         conversation_cache[chat_id][user_id].pop(0)
 
-                    CHATBOT = None
+                    CHATBOT = False
             except requests.RequestException:
                 return await message.reply_text("**I am busy now, I will talk later bye!**")
     except Exception as e:
