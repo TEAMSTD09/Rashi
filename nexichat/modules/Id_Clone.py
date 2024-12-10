@@ -121,8 +121,7 @@ async def clone_txt(client, message):
             await mi.edit_text(
                 f"**An error occurred while cloning the session:**\n\n**Error:** `{e}`"
             )
-        finally:
-            await ai.stop()
+        
     else:
         await message.reply_text(
             "**Provide a Pyrogram String Session after the /idclone **\n\n"
