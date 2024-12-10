@@ -10,7 +10,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, 
 from deep_translator import GoogleTranslator
 from nexichat.database.chats import add_served_chat
 from nexichat.database.users import add_served_user
-from nexichat.database import abuse_list, add_served_cchat, add_served_cuser, chatai
+from nexichat.database import abuse_list, add_served_cchat, add_served_chat, add_served_user, add_served_cuser, chatai
 from config import MONGO_URL, OWNER_ID
 from nexichat import nexichat, mongo, LOGGER, db
 from nexichat.mplugin.helpers import languages
@@ -388,10 +388,10 @@ async def chatbot_responsee(client: Client, message: Message):
 
         if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
             if message.chat.type in ["group", "supergroup"]:
-                await add_served_cchat(chat_id, bot_id)
+                await add_served_cchat(bot_id, message.chat.id)
                 return await add_served_chat(chat_id)
             else:
-                await add_served_cuser(chat_id, bot_id)
+                await add_served_cuser(bot_id, message.chat.id)
                 return await add_served_user(chat_id)
                 
         if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
