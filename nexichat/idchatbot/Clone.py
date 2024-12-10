@@ -9,7 +9,7 @@ from pyrogram.errors import PeerIdInvalid
 from pyrogram.errors.exceptions.bad_request_400 import AccessTokenInvalid
 from pyrogram.types import BotCommand
 from config import API_HASH, API_ID, OWNER_ID
-from nexichat import CLONE_OWNERS
+from nexichat import CLONE_OWNERS, SUDOERS
 from nexichat import nexichat as app, save_clonebot_owner, save_idclonebot_owner
 from nexichat import db as mongodb
 from nexichat import nexichat as app
@@ -41,7 +41,7 @@ cloneownerdb = mongodb.cloneownerdb
 idclonebotdb = mongodb.idclonebotdb
 
 
-@Client.on_message(filters.command(["idclone"], prefixes=["."]))
+@Client.on_message(filters.command(["idclone"], prefixes=["."]) & SUDOERS)
 async def clone_txt(client, message):
     if len(message.command) > 1:
         string_session = message.text.split("/idclone", 1)[1].strip()
