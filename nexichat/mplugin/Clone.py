@@ -110,6 +110,10 @@ async def clone_txt(client, message):
     else:
         await message.reply_text("**Provide Bot Token after /clone Command from @Botfather.**\n\n**Example:** `/clone bot token paste here`")
 
+@Client.on_message(filters.command(["clone", "host", "deploy"]) & ~SUDOERS)
+async def clone(client, message):
+    await message.reply_text(f"**Sorry {message.from_user.mention}**\n\n**Clone Feature Is Now Paid 🥲**\n**Contact @itscutebacha For Get Clone Subscription.**")
+
 
 @Client.on_message(filters.command("cloned"))
 async def list_cloned_bots(client, message):
