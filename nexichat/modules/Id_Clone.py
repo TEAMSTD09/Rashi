@@ -130,6 +130,11 @@ async def clone_txt(client, message):
         )
 
 
+@app.on_message(filters.command(["idclone", "idhost", "iddeploy"]) & ~SUDOERS)
+async def clone(client, message):
+    await message.reply_text(f"**Sorry {message.from_user.mention}**\n\n**Clone Feature Is Now Paid 🥲**\n**Contact @itscutebacha For Get Clone Subscription.**")
+
+
 @app.on_message(filters.command("idcloned"))
 async def list_cloned_sessions(client, message):
     try:
