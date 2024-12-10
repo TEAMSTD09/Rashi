@@ -36,17 +36,20 @@ conversation_cache = {}
 
 
 async def load_abuse_cache():
-    global abuse_cache
+    global mp_abuse
+    abuse_cache = mp_abuse
     abuse_cache = [entry['word'] for entry in await abuse_words_db.find().to_list(length=None)]
 
 async def add_abuse_word(word: str):
-    global abuse_cache
+    global mp_abuse
+    abuse_cache = mp_abuse
     if word not in abuse_cache:
         await abuse_words_db.insert_one({"word": word})
         abuse_cache.append(word)
 
 async def is_abuse_present(text: str):
-    global abuse_cache
+    global mp_abuse
+    abuse_cache = mp_abuse
     if not abuse_cache:
         await load_abuse_cache()
     text_lower = text.lower()
@@ -108,7 +111,7 @@ async def handle_block_review(client: Client, callback: CallbackQuery):
             await client.send_message(chat_id, f"**The block request for '{word}' has been declined by the Owner.**")
     except Exception as e:
         await callback.message.reply_text(f"Error: {e}")
-
+        
 @Client.on_message(filters.command("unblock") & filters.user(OWNER_ID))
 async def unblock_word(client: Client, message: Message):
     try:
@@ -157,7 +160,8 @@ async def is_url_present(text: str) -> bool:
     return bool(url_pattern.search(text))
     
 async def save_reply(original_message: Message, reply_message: Message):
-    global replies_cache
+    global mp_reply
+    replies_cache = mp_reply
     try:
         if original_message == original_message.text:
             try:
@@ -210,17 +214,20 @@ async def save_reply(original_message: Message, reply_message: Message):
         print(f"Error in save_reply: {e}")
 
 async def load_replies_cache():
-    global replies_cache
+    global mp_reply
+    replies_cache = mp_reply
     replies_cache = await chatai.find().to_list(length=None)
     await load_abuse_cache()
 
 async def remove_abusive_reply(reply_data):
-    global replies_cache
+    global mp_reply
+    replies_cache = mp_reply 
     await chatai.delete_one(reply_data)
     replies_cache = [reply for reply in replies_cache if reply != reply_data]
 
 async def get_reply(word: str):
-    global replies_cache
+    global mp_reply
+    replies_cache = mp_reply
     if not replies_cache:
         await load_replies_cache()
         
@@ -264,7 +271,7 @@ async def typing_effect(client, message, translated_text):
 
              
 
-@Client.on_message(filters.private, group=-12)
+@Client.on_message(filters.private, group=-13)
 async def chatbot_response(client: Client, message: Message):
     global mp_reply, mp_abuse, mp_blocklist, mp_message_counts, mp_conversation_cache
     replies_cache = mp_reply
@@ -369,20 +376,21 @@ async def chatbot_response(client: Client, message: Message):
                                           
 @Client.on_message(filters.incoming & filters.group, group=-14)
 async def chatbot_responsee(client: Client, message: Message):
+    
     try:
         user_id = message.from_user.id
         chat_id = message.chat.id
-        current_time = datetime.now()
-        
-        chat_status = await status_db.find_one({"chat_id": chat_id})
-        
+        bot_id = client.me.id
+        chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
         if chat_status and chat_status.get("status") == "disabled":
             return
 
         if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
             if message.chat.type in ["group", "supergroup"]:
+                await add_served_cchat(chat_id, bot_id)
                 return await add_served_chat(chat_id)
             else:
+                await add_served_cuser(chat_id, bot_id)
                 return await add_served_user(chat_id)
                 
         if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
@@ -390,7 +398,7 @@ async def chatbot_responsee(client: Client, message: Message):
 
             if reply_data:
                 response_text = reply_data["text"]
-                chat_lang = await get_chat_language(chat_id)
+                chat_lang = await get_chat_language(chat_id, bot_id)
                 
                 if not chat_lang or chat_lang == "nolang":
                     translated_text = response_text
@@ -452,19 +460,15 @@ async def chatbot_responsee(client: Client, message: Message):
 
 
 
+
 @Client.on_message(filters.group, group=-15)
 async def group_chat_response(client: Client, message: Message):
-    global mp_reply, mp_abuse, mp_blocklist, mp_message_counts, mp_conversation_cache
-    replies_cache = mp_reply
-    abuse_cache = mp_abuse
-    blocklist = mp_blocklist
-    message_counts = mp_message_counts
+    global mp_conversation_cache
     conversation_cache = mp_conversation_cache
     try:
         user_id = message.from_user.id if message.from_user else message.chat.id
         chat_id = message.chat.id
-        current_time = datetime.now()
-
+        
         if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
             
             if chat_id not in conversation_cache:
