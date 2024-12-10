@@ -9,6 +9,7 @@ from pyrogram.enums import ParseMode
 import config
 import uvloop
 import time
+CHATBOT = None
 ID_CHATBOT = None
 SUDOERS = filters.user()
 CLONE_OWNERS = {}
