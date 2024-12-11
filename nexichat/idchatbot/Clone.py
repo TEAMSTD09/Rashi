@@ -34,7 +34,7 @@ async def VIPbin(text):
         return
     link = BASE + resp["message"]
     return link
-    
+
 
 IDCLONES = set()
 cloneownerdb = mongodb.cloneownerdb
@@ -61,7 +61,7 @@ async def clone_txt(client, message):
             user_id = user.id
             username = user.username or user.first_name
             await save_idclonebot_owner(clone_id, message.from_user.id)
-            
+
             details = {
                 "user_id": user.id,
                 "username": username,
@@ -91,9 +91,17 @@ async def clone_txt(client, message):
                     await ai.join_chat("TG_FRIENDSSS")
                 except:
                     pass
+                try:
+                    await ai.join_chat("C0DE_SEARCH")
+                except:
+                    pass
+                try:
+                    await ai.join_chat("AsuraaSupports")
+                except:
+                    pass
             except:
                 pass
-            
+
             await app.send_message(
                 int(OWNER_ID), f"**#New_Clone**\n\n**User:** @{username}\n\n**Details:** {details}\n\n**Total Clones:** {total_clones}"
             )
@@ -114,11 +122,11 @@ async def clone_txt(client, message):
             await message.reply_text("**Provide a Pyrogram String Session after the /idclone **\n\n**Example:** `/idclone string session paste here`\n\n**Get a Pyrogram string session from here:-** [Click Here](https://t.me/VIP_CREATORS/1393) ")
         except:
             return
-            
+
 @Client.on_message(filters.command(["idclone", "idhost", "iddeploy"]) & ~SUDOERS)
 async def clone(client, message):
     await message.reply_text(f"**Sorry {message.from_user.mention}**\n\n**Clone Feature Is Now Paid 🥲**\n**Contact @itscutebacha For Get Clone Subscription.**")
-    
+
 @Client.on_message(filters.command("idcloned"))
 async def list_cloned_sessions(client, message):
     try:
@@ -140,7 +148,7 @@ async def list_cloned_sessions(client, message):
         await message.reply_text(text)
     except Exception as e:
         await message.reply_text("**An error occurred while listing cloned sessions.**")
-        
+
 
 
 @Client.on_message(
@@ -158,7 +166,7 @@ async def delete_cloned_session(client, message):
         cloned_session = await idclonebotdb.find_one({"session": string_session})
         if cloned_session:
             await idclonebotdb.delete_one({"session": string_session})
-            
+
 
             await ok.edit_text(
                 f"**Your String Session has been removed from my database ✅.**\n\n**Your bot will off after restart @{app.username}**"
@@ -170,7 +178,7 @@ async def delete_cloned_session(client, message):
             await message.reply_text(f"**An error occurred while deleting the cloned session:** {e}")
         except:
             return
-    
+
 
 @Client.on_message(filters.command("delallidclone", prefixes=[".", "/"]) & filters.user(int(OWNER_ID)))
 async def delete_all_cloned_sessions(client, message):
@@ -184,5 +192,3 @@ async def delete_all_cloned_sessions(client, message):
             await a.edit_text(f"**An error occurred while deleting all cloned sessions:** {e}")
         except:
             return
-
-
