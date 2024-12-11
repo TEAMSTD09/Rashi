@@ -478,7 +478,7 @@ async def group_chat_response(client: Client, message: Message):
         chat_id = message.chat.id
         
         if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
-            CHATBOT = True
+            
             if chat_id not in conversation_cache:
                 conversation_cache[chat_id] = {}
             if user_id not in conversation_cache[chat_id]:
