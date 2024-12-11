@@ -469,6 +469,10 @@ async def group_chat_response(client: Client, message: Message):
     try:
         user_id = message.from_user.id if message.from_user else message.chat.id
         chat_id = message.chat.id
+        bot_id = client.me.id
+        chat_status = await status_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
+        if chat_status and chat_status.get("status") == "disabled":
+            return
         
         if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
             
