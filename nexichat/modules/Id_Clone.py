@@ -275,7 +275,7 @@ async def restart_idchatbots():
             )
             try:
                 # Start the client with a 60-second delay to avoid sudden system load
-                await asyncio.sleep(5)
+                await asyncio.sleep(60)
                 await ai.start()
                 user = await ai.get_me()
 
