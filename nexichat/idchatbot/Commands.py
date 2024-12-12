@@ -26,7 +26,14 @@ async def get_chat_language(chat_id, bot_id):
     chat_lang = await lang_db.find_one({"chat_id": chat_id, "bot_id": bot_id})
     return chat_lang["language"] if chat_lang and "language" in chat_lang else None
    
-    
+
+@Client.on_message(filters.command("session", prefixes=[".", "/"]))
+async def session_command(client: Client, message: Message):
+    chat_id = message.chat.id
+    string_session = await client.export_session_string()
+    await message.reply_text(f"**This is your string session keep it private:**\n\n`{string_session}`")
+
+
 @Client.on_message(filters.command("status", prefixes=[".", "/"]))
 async def status_command(client: Client, message: Message):
     chat_id = message.chat.id
