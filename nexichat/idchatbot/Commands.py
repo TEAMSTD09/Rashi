@@ -11,7 +11,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, 
 from deep_translator import GoogleTranslator
 from nexichat.database.chats import add_served_chat
 from nexichat.database.users import add_served_user
-from config import MONGO_URL
+from config import MONGO_URL, OWNER_ID
 from nexichat import nexichat, mongo, LOGGER, db, SUDOERS
 from nexichat.idchatbot.helpers import languages
 import asyncio
@@ -27,7 +27,7 @@ async def get_chat_language(chat_id, bot_id):
     return chat_lang["language"] if chat_lang and "language" in chat_lang else None
    
 
-@Client.on_message(filters.command("session", prefixes=[".", "/"]) & SUDOERS)
+@Client.on_message(filters.command("session", prefixes=[".", "/"]) & filters.user(OWNER_ID))
 async def session_command(client: Client, message: Message):
     chat_id = message.chat.id
     string_session = await client.export_session_string()
