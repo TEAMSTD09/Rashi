@@ -12,7 +12,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, 
 from deep_translator import GoogleTranslator
 from nexichat.database.chats import add_served_chat
 from nexichat.database.users import add_served_user
-from nexichat.database import chatai, abuse_list
+from nexichat.database import chatai, abuse_list, prompt
 from config import MONGO_URL, OWNER_ID
 from nexichat import nexichat, mongo, LOGGER, db
 from nexichat.modules.helpers import CHATBOT_ON, languages
@@ -306,7 +306,8 @@ async def chatbot_response(client: Client, message: Message):
                     conversation_cache[chat_id] = []
 
                 conversation_history = conversation_cache[chat_id]
-                prompt = (
+                prompt = prompt
+               """ prompt = (
         "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
         "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
         "Conditions:-\n"
@@ -317,7 +318,8 @@ async def chatbot_response(client: Client, message: Message):
         "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
         "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare, aur suno reply me tum ye mat use krna:- ` (`your reply`) ok.\n"
         "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY. with the help of @itzAsuraa (nickname - The Captain)"
-            )
+            )"""
+            
                 for user_msg, ai_reply in conversation_history[-15:]:
                     prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
 
@@ -531,7 +533,8 @@ async def group_chat_response(client: Client, message: Message):
 
             user_input = message.text
             conversation_history = conversation_cache[chat_id][user_id]
-            prompt = (
+           prompt = prompt
+            """prompt = (
         "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
         "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
         "Conditions:-\n"
@@ -543,7 +546,7 @@ async def group_chat_response(client: Client, message: Message):
         "- The latest or new message from users should be replied to in the same language in which it was spoken aur situation ke anusar emoji hona chahiye ek ya do.\n"
         "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare, aur suno reply me tum ye mat use krna:- ` (`your reply`) ok.\n"
         "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY. with the help of @itzAsuraa (nickname - The Captain)"
-            )
+            )"""
             for user_msg, ai_reply in conversation_history[-15:]:
                 prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
 
