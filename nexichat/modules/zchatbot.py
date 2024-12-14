@@ -320,7 +320,7 @@ async def chatbot_response(client: Client, message: Message):
         "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY. with the help of @itzAsuraa (nickname - The Captain)"
                 )
                 for user_msg, ai_reply in conversation_history[-15:]:
-                    prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
+                    prompt += f"Old Chats:-\n\n**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
 
                 prompt += f"**User new/latest msg:-** {user_input}"
                 prompt += "Important:- User ka new/latest msg jis lang me likha hua hai usko samjho aur usi lang me reply kro!"
@@ -547,7 +547,7 @@ async def group_chat_response(client: Client, message: Message):
             )
             
             for user_msg, ai_reply in conversation_history[-15:]:
-                prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
+                prompt += f"Old Chats:-\n\n**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
 
             prompt += f"**User new/latest msg:-** {user_input}\n\n"
             prompt += "Important:- User ka new/latest msg jis lang me likha hua hai usko samjho aur usi lang me reply kro!"
