@@ -268,6 +268,8 @@ async def chatbot_response(client: Client, message: Message):
     user_input = None
 
     try:
+        if message.text:
+            return
         current_time = datetime.now()
         blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
 
@@ -308,7 +310,7 @@ async def chatbot_response(client: Client, message: Message):
                 if user_id not in conversation_cache[chat_id]:
                     conversation_cache[chat_id][user_id] = []
 
-                conversation_history = conversation_cache[chat_id][user_id]
+                conversation_history = conversation_cache[chat_id]
                 prompt = (
         "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
         "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
@@ -429,7 +431,7 @@ async def chatbot_responsee(client: Client, message: Message):
             else:
                 return await add_served_user(chat_id)
                 
-        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
+        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot and not message.text)):
             reply_data = await get_reply(message.text)
 
             if reply_data:
@@ -497,17 +499,19 @@ async def chatbot_responsee(client: Client, message: Message):
 
 
 
-@app.on_message(filters.group, group=-18)
+@app.on_message(filters.incoming, group=-18)
 async def group_chat_response(client: Client, message: Message):
     global blocklist, message_counts, conversation_cache, user_data_cache
     try:
+        if not message.text:
+            return
         user_id = message.from_user.id if message.from_user else message.chat.id
         chat_id = message.chat.id
         current_time = datetime.now()
 
         blocklist = {uid: time for uid, time in blocklist.items() if time > current_time}
 
-        if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
+        if ((client.me.username in message.text and message.text.startswith("@")) or (not message.reply_to_message and not message.from_user.is_bot and message.text) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
             if user_id not in message_counts:
                 message_counts[user_id] = {"count": 1, "last_time": current_time}
             else:
