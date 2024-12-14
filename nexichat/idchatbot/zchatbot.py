@@ -411,7 +411,7 @@ async def chatbot_responsee(client: Client, message: Message):
                 await add_served_cuser(chat_id, bot_id)
                 return await add_served_user(chat_id)
                 
-        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
+        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot and not message.text)):
             CHATBOT = True
             reply_data = await get_reply(message.text)
             
@@ -495,7 +495,7 @@ async def group_chat_response(client: Client, message: Message):
         if chat_status and chat_status.get("status") == "disabled":
             return
         
-        if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
+        if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text) or (not message.reply_to_message and not message.from_user.is_bot and message.text)):
             
             if chat_id not in conversation_cache:
                 conversation_cache[chat_id] = {}
