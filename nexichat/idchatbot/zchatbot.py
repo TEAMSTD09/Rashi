@@ -311,10 +311,12 @@ async def chatbot_response(client: Client, message: Message):
 
                 conversation_history = conversation_cache[chat_id]
                 prompt = prompt
-                for user_msg, ai_reply in conversation_history[-50:]:
-                    prompt += f"User: {user_msg}\nAI: {ai_reply}\n\n"
-                prompt += f"User: {user_input}\nAI:"
+                for user_msg, ai_reply in conversation_history[-15:]:
+                    prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
 
+                prompt += f"**User new/latest msg:-** {user_input}\n\n"
+                prompt += "Important:- User ka new/latest msg jis lang me likha hua hai usko samjho aur usi lang me reply kro!"
+            
                 base_url = config.API
                 try:
                    
@@ -494,8 +496,9 @@ async def group_chat_response(client: Client, message: Message):
             for user_msg, ai_reply in conversation_history[-15:]:
                 prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
 
-            prompt += f"**User new/latest msg:-** {user_input}"
-
+            prompt += f"**User new/latest msg:-** {user_input}\n\n"
+            prompt += "Important:- User ka new/latest msg jis lang me likha hua hai usko samjho aur usi lang me reply kro!"
+            
             base_url = config.API
             try:
                 CHATBOT = True
