@@ -273,7 +273,7 @@ async def typing_effect(client, message, translated_text):
 
              
 
-@Client.on_message(filters.incoming & filters.private & ~filters.text, group=-10)
+@Client.on_message(filters.incoming & filters.private, group=-10)
 async def chatbot_response(client: Client, message: Message):
     global m_reply, m_abuse, m_blocklist, m_message_counts, m_conversation_cache
     replies_cache = m_reply
@@ -411,7 +411,7 @@ async def chatbot_responsee(client: Client, message: Message):
                 await add_served_cuser(chat_id, bot_id)
                 return await add_served_user(chat_id)
                 
-        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot and not message.text)):
+        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
             CHATBOT = True
             reply_data = await get_reply(message.text)
             
@@ -481,7 +481,7 @@ async def chatbot_responsee(client: Client, message: Message):
 
 
 
-@Client.on_message(filters.group & filters.private, group=-12)
+@Client.on_message(filters.group, group=-12)
 async def group_chat_response(client: Client, message: Message):
     global m_conversation_cache, CHATBOT
     if CHATBOT:
@@ -495,7 +495,7 @@ async def group_chat_response(client: Client, message: Message):
         if chat_status and chat_status.get("status") == "disabled":
             return
         
-        if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text) or (not message.reply_to_message and not message.from_user.is_bot and message.text)):
+        if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
             
             if chat_id not in conversation_cache:
                 conversation_cache[chat_id] = {}
