@@ -5,3 +5,4 @@ from .clonestats import *
 from .storage import *
 from .sudoers import *
 from .abuse import *
+from .prompt import *
