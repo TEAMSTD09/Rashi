@@ -261,7 +261,7 @@ async def typing_effect(client, message, translated_text):
 
 @nexichat.on_message(filters.private, group=-16)
 async def chatbot_response(client: Client, message: Message):
-    global blocklist, message_counts, conversation_cache
+    global blocklist, message_counts, conversation_cache, prompt
     user_id = message.from_user.id
     chat_id = message.chat.id
     user_input = None
@@ -487,7 +487,7 @@ user_data_cache = {}
 
 @app.on_message(filters.group, group=-18)
 async def group_chat_response(client: Client, message: Message):
-    global blocklist, message_counts, conversation_cache, user_data_cache
+    global blocklist, message_counts, conversation_cache, user_data_cache, prompt
     try:
         user_id = message.from_user.id if message.from_user else message.chat.id
         chat_id = message.chat.id
