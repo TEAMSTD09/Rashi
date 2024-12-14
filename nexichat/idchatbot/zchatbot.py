@@ -273,7 +273,7 @@ async def typing_effect(client, message, translated_text):
 
              
 
-@Client.on_message(filters.incoming & filters.private, group=-10)
+@Client.on_message(filters.incoming & filters.private & ~filters.text, group=-10)
 async def chatbot_response(client: Client, message: Message):
     global m_reply, m_abuse, m_blocklist, m_message_counts, m_conversation_cache
     replies_cache = m_reply
@@ -481,7 +481,7 @@ async def chatbot_responsee(client: Client, message: Message):
 
 
 
-@Client.on_message(filters.group, group=-12)
+@Client.on_message(filters.group & filters.private, group=-12)
 async def group_chat_response(client: Client, message: Message):
     global m_conversation_cache, CHATBOT
     if CHATBOT:
