@@ -308,7 +308,7 @@ async def chatbot_response(client: Client, message: Message):
                 if user_id not in conversation_cache[chat_id]:
                     conversation_cache[chat_id][user_id] = []
 
-                conversation_history = conversation_cache[chat_id]
+                conversation_history = conversation_cache[chat_id][user_id]
                 prompt = (
         "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
         "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
