@@ -407,7 +407,7 @@ async def chatbot_responsee(client: Client, message: Message):
                 await add_served_cuser(bot_id, message.chat.id)
                 return await add_served_user(chat_id)
                 
-        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot)):
+        if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and not message.text) or (not message.reply_to_message and not message.from_user.is_bot and not message.text)):
             reply_data = await get_reply(message.text)
 
             if reply_data:
@@ -475,8 +475,8 @@ async def chatbot_responsee(client: Client, message: Message):
 
 
 
-@Client.on_message(filters.group, group=-15)
-async def group_chat_response(client: Client, message: Message):
+@Client.on_message(filters.incoming, group=-15)
+async def group_chat_respone(client: Client, message: Message):
     global mp_conversation_cache
     conversation_cache = mp_conversation_cache
     try:
@@ -487,7 +487,7 @@ async def group_chat_response(client: Client, message: Message):
         if chat_status and chat_status.get("status") == "disabled":
             return
         
-        if ((client.me.username in message.text and message.text.startswith("@")) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
+        if ((client.me.username in message.text and message.text.startswith("@")) or (not message.reply_to_message and not message.from_user.is_bot and message.text) or (message.reply_to_message and message.reply_to_message.from_user.id == client.me.id and message.text)):
             
             if chat_id not in conversation_cache:
                 conversation_cache[chat_id] = {}
