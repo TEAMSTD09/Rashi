@@ -502,6 +502,11 @@ async def chatbot_responsee(client: Client, message: Message):
 @app.on_message(filters.incoming, group=-18)
 async def group_chat_response(client: Client, message: Message):
     global blocklist, message_counts, conversation_cache, user_data_cache
+    chat_id = message.chat.id
+    
+    chat_status = await status_db.find_one({"chat_id": chat_id})
+        if chat_status and chat_status.get("status") == "disabled":
+            return
     try:
         if not message.text:
             return
