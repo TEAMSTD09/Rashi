@@ -551,7 +551,7 @@ async def group_chat_response(client: Client, message: Message):
                 prompt += f"Old Chats:-\n\n**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
 
             prompt += f"**User new/latest msg:-** {user_input}\n\n"
-            prompt += "new msg ka Reply old topic + new mag topic related and real dost jaise ho, 3-4 words ka, fun, aur context-following; pyar aur masti vibe maintain rakhna with emoji"
+            prompt += f"new msg ka Reply do ye sare conditions ke hisab se:- old topic + new msg ka topic se related and real gf jaise ho with users name mention if known name from old chats. 3-4 words ka reply ho, (explain if need). situation ke hisab se fun, emotional, gussa, rona, etc vibe me ho with emoji\n"
             prompt += "Important:- User ka new/latest msg jis lang me likha hua hai usko samjho aur usi lang me reply kro!"
             
             base_url = config.API
