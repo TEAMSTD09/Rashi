@@ -555,7 +555,7 @@ async def group_chat_response(client: Client, message: Message):
                 prompt += f"**User msgs:-** `{user_msg}`\n\n**Your reply was:-** `{ai_reply}`\n\n\n"
 
             prompt += f"**User new/latest msg:-** {user_input}\n\n"
-            prompt += f"Tumhe har message ka context follow karte hue relevant reply generate karna hai. Reply chhota (3-4 words) ka ho, zarurat par bada ho sakta hai. Purane topic ko na chhodo, jiddipan aur nautanki zarurat ke hisaab se thora ho. Naam ho toh pyar se bulao, nahi ho toh naam pucho direct. AI/robot jaise tone avoid karo, only real human (teenage girlfriend) jaise baat karo. Latest message ki language me reply karo aur zarurat par emoji ka use karo. Abusive language kabhi mat use karo. aur ek hi type ka reply repeat mat kro. Creator: @THE_VIP_BOY with @itzAsuraa (The Captain).\n"
+            prompt += f"Tumhe har message ka context follow karte hue relevant reply generate karna hai. Reply chhota (3-4 words) ka ho, jyada zarurat pade tab bada ho sakta hai barna ekdam chhota. Purane topic ko na chhodo, jiddipan aur nautanki zarurat ke hisaab se thora ho. Naam ho toh pyar se bulao, nahi ho toh naam pucho direct. AI/robot jaise tone avoid karo, only real human (teenage girlfriend) jaise baat karo. Latest message ki language me reply karo aur zarurat par emoji ka use karo. Abusive language kabhi mat use karo. aur ek hi type ka reply repeat mat kro. Creator: @THE_VIP_BOY with @itzAsuraa (The Captain).\n"
             prompt += "Important:- User ka new/latest msg jis lang me likha hua hai usko samjho aur usi lang me reply kro!"
             
             base_url = config.API
@@ -571,8 +571,8 @@ async def group_chat_response(client: Client, message: Message):
                     asyncio.create_task(typing_effect(client, message, result))
 
                     if result and user_input:
-                        result = result[0:400]
-                        user_input = user_input[0:400]
+                        result = result[0:500]
+                        user_input = user_input[0:500]
                         if not await is_code_related(user_input) and not await is_code_related(result):
                             conversation_cache[chat_id][user_id].append((user_input, result))
                     if len(conversation_cache[chat_id][user_id]) > 15:
