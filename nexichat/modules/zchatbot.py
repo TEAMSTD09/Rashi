@@ -48,6 +48,10 @@ async def is_abuse_present(text: str):
     text_lower = text.lower()
     return any(word in text_lower for word in abuse_list) or any(word in text_lower for word in abuse_cache)
 
+async def is_code_related(text):
+    code_indicators = ["def ", "return ", "import ", "await ", "try:", "except", "function", "{", "}", "<", ">", "="]
+    return any(indicator in text for indicator in code_indicators)
+    
 @nexichat.on_message(filters.command("block"))
 async def request_block_word(client: Client, message: Message):
     try:
@@ -551,7 +555,7 @@ async def group_chat_response(client: Client, message: Message):
                 prompt += f"**User msgs:-** `{user_msg}`\n\n**Your reply was:-** `{ai_reply}`\n\n\n"
 
             prompt += f"**User new/latest msg:-** {user_input}\n\n"
-            prompt += f"Tumhe har message ka context follow karte hue relevant reply generate karna hai. Reply chhota (3-5 words) ho, zarurat par bada ho sakta hai. Purane topic ko na chhodo, jiddipan aur nautanki zarurat ke hisaab se ho. Naam ho toh pyar se bulao, nahi ho toh naam pucho. AI/robot jaise tone avoid karo, real human (teenage girlfriend) jaise baat karo. Latest message ki language me reply karo aur zarurat par emoji ka use karo. Abusive language mat use karo. Creator: @THE_VIP_BOY with @itzAsuraa (The Captain).\n"
+            prompt += f"Tumhe har message ka context follow karte hue relevant reply generate karna hai. Reply chhota (3-4 words) ka ho, zarurat par bada ho sakta hai. Purane topic ko na chhodo, jiddipan aur nautanki zarurat ke hisaab se thora ho. Naam ho toh pyar se bulao, nahi ho toh naam pucho direct. AI/robot jaise tone avoid karo, only real human (teenage girlfriend) jaise baat karo. Latest message ki language me reply karo aur zarurat par emoji ka use karo. Abusive language kabhi mat use karo. aur ek hi type ka reply repeat mat kro. Creator: @THE_VIP_BOY with @itzAsuraa (The Captain).\n"
             prompt += "Important:- User ka new/latest msg jis lang me likha hua hai usko samjho aur usi lang me reply kro!"
             
             base_url = config.API
@@ -569,6 +573,8 @@ async def group_chat_response(client: Client, message: Message):
                     if result and user_input:
                         result = result[0:400]
                         user_input = user_input[0:400]
+                        if not await is_code_related(user_input)
+                        if not await is_code_related(result)
                         conversation_cache[chat_id][user_id].append((user_input, result))
                     if len(conversation_cache[chat_id][user_id]) > 15:
                         conversation_cache[chat_id][user_id].pop(0)
