@@ -308,11 +308,9 @@ async def chatbot_response(client: Client, message: Message):
         if ((message.reply_to_message and message.reply_to_message.from_user.id == client.me.id) or not message.reply_to_message) and not message.from_user.is_bot:
             user_input = message.text if not message.reply_to_message else message.reply_to_message.text
 
-            if user_input:
+            if user_input and message.text:
                 if chat_id not in conversation_cache:
-                    conversation_cache[chat_id] = {}
-                if user_id not in conversation_cache[chat_id]:
-                    conversation_cache[chat_id][user_id] = []
+                    conversation_cache[chat_id] = []
 
                 conversation_history = conversation_cache[chat_id]
                 prompt = f"our old chat history given below, Read carefully, (if no old chats read only new msg):-\n\n"
@@ -339,9 +337,9 @@ async def chatbot_response(client: Client, message: Message):
                         if result and user_input:
                             result = result[0:500]
                             user_input = user_input[0:500]
-                            conversation_cache[chat_id][user_id].append((user_input, result))
-                        if len(conversation_cache[chat_id][user_id]) > 15:
-                            conversation_cache[chat_id][user_id].pop(0)
+                            conversation_cache[chat_id].append((user_input, result))
+                        if len(conversation_cache[chat_id]) > 15:
+                            conversation_cache[chat_id].pop(0)
 
                         return
                 except requests.RequestException as e:
