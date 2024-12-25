@@ -7,7 +7,7 @@ from nexichat import nexichat as app
 from config import OWNER_ID as LOG_GROUP_ID
 
 
-@app.on_message(filters.command(["ig", "insta", "instagram", "reel"]))
+@app.on_message(filters.command(["ig", "insta", "instagram", "reels", "reel"]))
 async def download_instagram_video(client, message):
     if len(message.command) < 2:
         await message.reply_text(
