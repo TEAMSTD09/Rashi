@@ -49,7 +49,7 @@ async def is_abuse_present(text: str):
     return any(word in text_lower for word in abuse_list) or any(word in text_lower for word in abuse_cache)
 
 async def is_code_related(text):
-    code_indicators = ["def ", "return ", "import ", "await ", "try:", "except", "function", "{", "}", "<", ">", "="]
+    code_indicators = ["def ", "return ", "import ", "await ", "try:", "except"]
     return any(indicator in text for indicator in code_indicators)
     
 @nexichat.on_message(filters.command("block"))
