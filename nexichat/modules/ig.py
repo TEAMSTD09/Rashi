@@ -1,45 +1,54 @@
+import re
 import requests
 from pyrogram import filters
+
 from nexichat import nexichat as app
 
-@app.on_message(filters.command(["ig", "instagram"]))
-async def download_instagram_content(client, message):
+from config import OWNER_ID as LOG_GROUP_ID
+
+
+@app.on_message(filters.command(["ig", "insta", "instagram", "reel"]))
+async def download_instagram_video(client, message):
     if len(message.command) < 2:
-        await message.reply_text("Please provide the Instagram URL after the command.")
-        return
-
-    url = message.text.split()[1]
-    if "instagram.com" not in url:
-        await message.reply_text("Invalid Instagram URL. Please check and try again.")
-        return
-
-    processing_message = await message.reply_text("Processing...")
-
-    api_url = f"https://insta-dl.hazex.workers.dev/?url={url}"
-    try:
-        response = requests.get(api_url)
-        response.raise_for_status()
-        result = response.json()
-
-        if result["error"]:
-            await processing_message.edit("Failed to download. The content might not be available.")
-            return
-
-        data = result["result"]
-        content_url = data["url"]
-        caption = (
-            f"**Type:** {data['extension']}\n"
-            f"**Quality:** {data.get('quality', 'Unknown')}\n"
-            f"**Size:** {data.get('formattedSize', 'Unknown')}\n"
+        await message.reply_text(
+            "Pʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴛʜᴇ Iɴsᴛᴀɢʀᴀᴍ ʀᴇᴇʟ URL ᴀғᴛᴇʀ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ"
         )
+        return
+    url = message.text.split()[1]
+    if not re.match(
+        re.compile(r"^(https?://)?(www\.)?(instagram\.com|instagr\.am)/.*$"), url
+    ):
+        return await message.reply_text(
+            "Tʜᴇ ᴘʀᴏᴠɪᴅᴇᴅ URL ɪs ɴᴏᴛ ᴀ ᴠᴀʟɪᴅ Iɴsᴛᴀɢʀᴀᴍ URL😅😅"
+        )
+    a = await message.reply_text("ᴘʀᴏᴄᴇssɪɴɢ...")
+    api_url = f"https://insta-dl.hazex.workers.dev/?url={url}"
 
-        await processing_message.delete()
-        if data["isVideo"]:
-            await message.reply_video(content_url, caption=caption)
-        else:
-            await message.reply_photo(content_url, caption=caption)
-
-    except requests.exceptions.RequestException:
-        await processing_message.edit("An error occurred while processing the request. Please try again.")
+    response = requests.get(api_url)
+    try:
+        result = response.json()
+        data = result["result"]
     except Exception as e:
-        await processing_message.edit(f"An unexpected error occurred: {e}")
+        f = f"Eʀʀᴏʀ :\n{e}"
+        try:
+            await a.edit(f)
+        except Exception:
+            await message.reply_text(f)
+            return await app.send_message(LOG_GROUP_ID, f)
+        return await app.send_message(LOG_GROUP_ID, f)
+    if not result["error"]:
+        video_url = data["url"]
+        duration = data["duration"]
+        quality = data["quality"]
+        type = data["extension"]
+        size = data["formattedSize"]
+        caption = f"**Dᴜʀᴀᴛɪᴏɴ :** {duration}\n**Qᴜᴀʟɪᴛʏ :** {quality}\n**Tʏᴘᴇ :** {type}\n**Sɪᴢᴇ :** {size}"
+        await a.delete()
+        await message.reply_video(video_url, caption=caption)
+    else:
+        try:
+            return await a.edit("Fᴀɪʟᴇᴅ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ ʀᴇᴇʟ")
+        except Exception:
+            return await message.reply_text("Fᴀɪʟᴇᴅ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ ʀᴇᴇʟ")
+
+
