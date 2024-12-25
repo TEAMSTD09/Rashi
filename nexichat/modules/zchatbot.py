@@ -337,8 +337,8 @@ async def chatbot_response(client: Client, message: Message):
                         asyncio.create_task(typing_effect(client, message, result))
 
                         if result and user_input:
-                            result = result[0:400]
-                            user_input = user_input[0:400]
+                            result = result[0:500]
+                            user_input = user_input[0:500]
                             conversation_cache[chat_id][user_id].append((user_input, result))
                         if len(conversation_cache[chat_id][user_id]) > 15:
                             conversation_cache[chat_id][user_id].pop(0)
