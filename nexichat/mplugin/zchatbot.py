@@ -339,9 +339,9 @@ async def chatbot_response(client: Client, message: Message):
                             result = result[0:500]
                             user_input = user_input[0:500]
                             if not await is_code_related(user_input) and not await is_code_related(result):
-                                conversation_cache[chat_id][user_id].append((user_input, result))
-                        if len(conversation_cache[chat_id][user_id]) > 15:
-                            conversation_cache[chat_id][user_id].pop(0)
+                                conversation_cache[chat_id].append((user_input, result))
+                        if len(conversation_cache[chat_id]) > 15:
+                            conversation_cache[chat_id].pop(0)
                         
                         return
                 except requests.RequestException as e:
