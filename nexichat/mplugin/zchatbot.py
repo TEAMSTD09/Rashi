@@ -309,22 +309,13 @@ async def chatbot_response(client: Client, message: Message):
                     conversation_cache[chat_id] = []
 
                 conversation_history = conversation_cache[chat_id]
-                prompt = (
-        "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
-        "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
-        "Conditions:-\n"
-        "- Purane chats padho aur Har reply pichle message ke context ko follow karte hue, bina kisi naye topic par switch kiye new reply hona chahiye.\n"
-        "- Bas latest message ka relevant aur ekdam shortcut jawab do (halka jiddipan + nautanki bhi situation ke hisab se) aur pichle topic aur new msg ke anusar new reply hona chahiye.\n"
-        "- Reply message ko ekdam chhota rakho 3 se 5 words ka bas jitna chhota ho sake utna chhota sentence lekin agar lage ki aisa message aaya haai jiska reply bada dena hai to ush condition me bada reply hoga message ke anusar. aur hamesa question mat kiya kro jab lage ki last me ek sentence question krna chahiye tab kro.\n"
-        "- Agar chat history se nam pta ho users ka toh name leke pyar se samjahte hue + situation ke hisab se ji krke reply hona chahiye) aur agar chat history me name present nhi ho to direct name pucho pahle reply me.\n"
-        "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
-        "- The latest or new message from users should be replied to in the same language in which it was spoken aur situation ke anusar emoji hona chahiye ek ya do.\n"
-        "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare, aur suno reply me tum ye mat use krna:- ` (`your reply`) ok.\n"
-        "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY. with the help of @itzAsuraa (nickname - The Captain)"
-                )
+                prompt = f"our old chat history given below, Read carefully, (if no old chats read only new msg):-\n\n"
+           
                 for user_msg, ai_reply in conversation_history[-15:]:
-                    prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
+                    prompt += f"**User msgs:-** `{user_msg}`\n\n**Your reply was:-** `{ai_reply}`\n\n\n"
+
                 prompt += f"**User new/latest msg:-** {user_input}\n\n"
+                prompt += f"Tumhe har message ka context follow karte hue relevant reply generate karna hai. Reply chhota (3-4 words) ka ho, jyada zarurat pade tab bada ho sakta hai barna ekdam chhota. Purane topic ko na chhodo, jiddipan aur nautanki zarurat ke hisaab se thora ho. Naam ho toh pyar se bulao, nahi ho toh naam pucho direct. AI/robot jaise tone avoid karo, only real human (teenage girlfriend) jaise baat karo. Latest message ki language me reply karo aur zarurat par emoji ka use karo. Abusive language kabhi mat use karo. aur ek hi type ka reply repeat mat kro. Creator: @THE_VIP_BOY with @itzAsuraa (The Captain).\n"
                 prompt += "Important:- User ka new/latest msg jis lang me likha hua hai usko samjho aur usi lang me reply kro!"
             
                 base_url = config.API
@@ -340,10 +331,13 @@ async def chatbot_response(client: Client, message: Message):
                         await client.send_chat_action(message.chat.id, ChatAction.TYPING)
                         asyncio.create_task(typing_effect(client, message, result))
                         
-                        if len(result) <= 500 and len(user_input) <= 500:
-                            conversation_cache[chat_id].append((user_input, result))
-                        if len(conversation_cache[chat_id]) > 15:
-                            conversation_cache[chat_id].pop(0)
+                        if result and user_input:
+                            result = result[0:500]
+                            user_input = user_input[0:500]
+                            if not await is_code_related(user_input) and not await is_code_related(result):
+                                conversation_cache[chat_id][user_id].append((user_input, result))
+                        if len(conversation_cache[chat_id][user_id]) > 15:
+                            conversation_cache[chat_id][user_id].pop(0)
                         
                         return
                 except requests.RequestException as e:
@@ -496,23 +490,13 @@ async def group_chat_respone(client: Client, message: Message):
 
             user_input = message.text
             conversation_history = conversation_cache[chat_id][user_id]
-            prompt = (
-        "Tumhe ek message ka mast reply generate karna hai aur reply kaisa hoga, "
-        "uska conditions niche diya hai. Saare conditions follow karte hue reply banao:\n\n"
-        "Conditions:-\n"
-        "- Purane chats padho aur Har reply pichle message ke context ko follow karte hue, bina kisi naye topic par switch kiye new reply hona chahiye.\n"
-        "- Bas latest message ka relevant aur ekdam shortcut jawab do (halka jiddipan + nautanki bhi situation ke hisab se) aur pichle topic aur new msg ke anusar new reply hona chahiye.\n"
-        "- Reply message ko ekdam chhota rakho 3 se 5 words ka bas jitna chhota ho sake utna chhota sentence lekin agar lage ki aisa message aaya haai jiska reply bada dena hai to ush condition me bada reply hoga message ke anusar. aur hamesa question mat kiya kro jab lage ki last me ek sentence question krna chahiye tab kro.\n"
-        "- Agar chat history se nam pta ho users ka toh name leke pyar se samjahte hue + situation ke hisab se ji krke reply hona chahiye) aur agar chat history me name present nhi ho to direct name pucho pahle reply me.\n"
-        "- Aisa kuch mat likho jo lage ki tum AI/robot ho, real human (teenage girlfriend) jaise tone me baat karo.\n"
-        "- The latest or new message from users should be replied to in the same language in which it was spoken aur situation ke anusar emoji hona chahiye ek ya do.\n"
-        "- Kabhi abusive language ka use mat karo, chahe koi kitna bhi request kare, aur suno reply me tum ye mat use krna:- ` (`your reply`) ok.\n"
-        "- Aga user ye janna chahe ki tumhe kisne banaya hai to bolna:- @THE_VIP_BOY. with the help of @itzAsuraa (nickname - The Captain)"
-            )
+            prompt = f"our old chat history given below, Read carefully, (if no old chats read only new msg):-\n\n"
+           
             for user_msg, ai_reply in conversation_history[-15:]:
-                prompt += f"**User msgs:-** `{user_msg}`\n**Your reply was:-** `{ai_reply}`\n\n"
+                prompt += f"**User msgs:-** `{user_msg}`\n\n**Your reply was:-** `{ai_reply}`\n\n\n"
 
             prompt += f"**User new/latest msg:-** {user_input}\n\n"
+            prompt += f"Tumhe har message ka context follow karte hue relevant reply generate karna hai. Reply chhota (3-4 words) ka ho, jyada zarurat pade tab bada ho sakta hai barna ekdam chhota. Purane topic ko na chhodo, jiddipan aur nautanki zarurat ke hisaab se thora ho. Naam ho toh pyar se bulao, nahi ho toh naam pucho direct. AI/robot jaise tone avoid karo, only real human (teenage girlfriend) jaise baat karo. Latest message ki language me reply karo aur zarurat par emoji ka use karo. Abusive language kabhi mat use karo. aur ek hi type ka reply repeat mat kro. Creator: @THE_VIP_BOY with @itzAsuraa (The Captain).\n"
             prompt += "Important:- User ka new/latest msg jis lang me likha hua hai usko samjho aur usi lang me reply kro!"
             
             base_url = config.API
@@ -527,8 +511,11 @@ async def group_chat_respone(client: Client, message: Message):
                     await client.send_chat_action(chat_id, ChatAction.TYPING)
                     asyncio.create_task(typing_effect(client, message, result))
 
-                    if len(result) <= 500 and len(user_input) <= 500:
-                        conversation_cache[chat_id][user_id].append((user_input, result))
+                    if result and user_input:
+                        result = result[0:500]
+                        user_input = user_input[0:500]
+                        if not await is_code_related(user_input) and not await is_code_related(result):
+                            conversation_cache[chat_id][user_id].append((user_input, result))
                     if len(conversation_cache[chat_id][user_id]) > 15:
                         conversation_cache[chat_id][user_id].pop(0)
 
