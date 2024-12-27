@@ -21,8 +21,11 @@ async def anony_boot():
         except Exception as ex:
             LOGGER.info(f"@{nexichat.username} Started, please start the bot from owner id.")
     
-        asyncio.create_task(restart_bots())
-        print("Restarting all cloned botsbin background")
+        try:
+            await restart_bots()
+        except Exception as ex:
+            await nexichat.send_message(int(OWNER_ID), f"Error in restarting cloned bots:- \n\n {ex}")
+            pass
         asyncio.create_task(restart_idchatbots())
         print("Restarting all id chatbot in background")
         await load_clone_owners()
