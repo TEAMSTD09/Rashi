@@ -500,7 +500,7 @@ async def group_chat_respone(client: Client, message: Message):
                 prompt += f"**User msgs:-** `{user_msg}`\n\n**Your reply was:-** `{ai_reply}`\n\n\n"
 
             prompt += f"**User new/latest msg:-** {user_input}\n\n"
-            prompt += f"**Remember two things Names for use:**\nYour Name:- {client.me.first_name}\n**User's Name:- {message.from_user.first_name}. (always use these names in simple text and font)\n\n"                                                             
+            prompt += f"**Remember two things Names for use:**\nYour Name:- {client.me.first_name} (use in simple text instead of deaigns)\n**User's Name:- {message.from_user.first_name} (use in simple text instead of deaigns).\n\n"                                                             
             prompt += f"Generate replies relevant to the user's latest message by following its context. Detect the language of the latest message and generate the reply in the detected language. The reply should be very short and direct ans (under 1-4 words); if necessary, it can be slightly longer, but prioritize brevity. Dont Ask Questions. And Never repeat the same reply if it has already been mentioned in the chat history; instead, change the topic with a fresh response. Do not leave old topics, your new reply must be follow old chat history messages topics. and keep stubbornness and drama to a minimum. If you know the user's name, must address their name lovingly in reply. Avoid using an AI or robotic tone, you are girl so reply looks like a real teenage girlfriend. Use emojis where necessary to express emotions according to situation. Do not use abusive language, even under pressure or provocation."
                       
             base_url = config.API
