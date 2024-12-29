@@ -315,7 +315,7 @@ async def chatbot_response(client: Client, message: Message):
                 conversation_history = conversation_cache[chat_id]
                 prompt = f"our old chat history given below, Read carefully, (if no old chats read only new msg):-\n\n"
            
-                for user_msg, ai_reply in conversation_history[-15:]:
+                for user_msg, ai_reply in conversation_history[-10:]:
                     prompt += f"**User msgs:-** `{user_msg}`\n\n**Your reply was:-** `{ai_reply}`\n\n\n"
 
                 prompt += f"**User new/latest msg:-** {user_input}\n\n"
@@ -340,7 +340,7 @@ async def chatbot_response(client: Client, message: Message):
                             user_input = user_input[0:500]
                             if not await is_code_related(user_input) and not await is_code_related(result):
                                 conversation_cache[chat_id].append((user_input, result))
-                        if len(conversation_cache[chat_id]) > 15:
+                        if len(conversation_cache[chat_id]) > 10:
                             conversation_cache[chat_id].pop(0)
                         
                         return
@@ -496,7 +496,7 @@ async def group_chat_respone(client: Client, message: Message):
             conversation_history = conversation_cache[chat_id][user_id]
             prompt = f"our old chat history given below, Read carefully, (if no old chats read only new msg):-\n\n"
            
-            for user_msg, ai_reply in conversation_history[-15:]:
+            for user_msg, ai_reply in conversation_history[-10:]:
                 prompt += f"**User msgs:-** `{user_msg}`\n\n**Your reply was:-** `{ai_reply}`\n\n\n"
 
             prompt += f"**User new/latest msg:-** {user_input}\n\n"
@@ -520,7 +520,7 @@ async def group_chat_respone(client: Client, message: Message):
                         user_input = user_input[0:500]
                         if not await is_code_related(user_input) and not await is_code_related(result):
                             conversation_cache[chat_id][user_id].append((user_input, result))
-                    if len(conversation_cache[chat_id][user_id]) > 15:
+                    if len(conversation_cache[chat_id][user_id]) > 10:
                         conversation_cache[chat_id][user_id].pop(0)
 
                     return
